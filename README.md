@@ -1,3 +1,15 @@
+# MOONDA Lunar Observatory
+
+This fork adds a local-first lunar site comparison prototype in [`moonda/`](./moonda/README.md), built with the upstream NASA-AMMOS renderer and NASA imagery and terrain data. The renderer source and its Apache-2.0 license are preserved.
+
+```sh
+cd moonda
+npm ci
+npm run dev
+```
+
+MOONDA has its own small build and local data; it does not require the Cesium ion credentials used by the original lunar example. See the application README for scientific methods, data sources, and limitations.
+
 # 3d-tiles-renderer
 
 [![npm version](https://img.shields.io/npm/v/3d-tiles-renderer.svg?style=flat-square)](https://www.npmjs.com/package/3d-tiles-renderer)
