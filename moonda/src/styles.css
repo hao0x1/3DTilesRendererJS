@@ -1000,10 +1000,9 @@ input[type='range'] { accent-color: #c7c7c8; cursor: pointer; }
 /* Scenario markers retain the projected world anchor while nearby badges separate. */
 .scenario-scene-label { width: 31px; height: 31px; padding: 0; pointer-events: auto; }
 .scenario-scene-label > span { position: relative; z-index: 1; }
-.scenario-scene-label > strong { position: absolute; left: calc(100% + 7px); top: 50%; transform: translateY(-50%); white-space: nowrap; color: #dce0dd; background: #181c1eee; border: 1px solid #61686b; border-radius: 4px; padding: 5px 7px; font: 400 11px var(--mono); opacity: 0; pointer-events: none; }
-.scenario-scene-label.is-active > strong, .scenario-scene-label.is-candidate > strong, .scenario-scene-label:hover > strong, .scenario-scene-label:focus-visible > strong { opacity: 1; }
-.scenario-scene-label.is-active > strong { left:calc(100% + 7px + max(0px,calc(-2 * var(--label-offset-x,0px)))); }
-.scenario-scene-label__leader { position: absolute; z-index: -1; left: calc(50% + min(0px,calc(-1 * var(--label-offset-x,0px)))); top: 50%; width: max(var(--label-offset-x,0px),calc(-1 * var(--label-offset-x,0px))); border-top: 1px solid #bcc5c1; pointer-events: none; }
+ .scenario-scene-caption { position:absolute; z-index:2; pointer-events:none; transform:none; color:#dce0dd; background:#181c1eee; border:1px solid #61686b; border-radius:4px; padding:6px 8px; font:400 11px/1.4 var(--mono); white-space:normal; overflow-wrap:anywhere; }
+.scenario-scene-caption[hidden] { display:none; }
+.scenario-scene-label__leader { position:absolute; z-index:-1; left:50%; top:50%; width:var(--label-leader-length,0px); border-top:1px solid #bcc5c1; transform:rotate(var(--label-leader-angle,0deg)); transform-origin:0 50%; pointer-events:none; }
 .viewer:has(.scene-candidate-controls) .scene-pick-hint:not(.scene-analysis-status), .viewer--terrain:has(.scene-candidate-controls) .scene-body-controls, .viewer--terrain:has(.scene-candidate-controls) .view-guidance, .viewer--terrain:has(.scene-candidate-controls) .surface-method { display: none; }
 .scene-candidate-controls { top: 139px; transform: none; max-height: calc(100% - 216px); display: flex; flex-direction: column; }
 .scene-candidate-controls > strong { flex-shrink: 0; }
@@ -1128,4 +1127,65 @@ input[type='range'] { accent-color: #c7c7c8; cursor: pointer; }
   .scenario-comparison.is-compact .scenario-comparison-arrivals { grid-template-columns: minmax(0,1fr); }
   .scenario-comparison.is-compact .scenario-comparison-arrivals > button { min-height: 48px; }
   .scenario-comparison.is-compact .scenario-comparison-outcome { grid-template-columns: minmax(0,1fr); gap: 8px; }
+}
+
+/* Scene HUD uses measured safe areas instead of independent fixed offsets. */
+.mission-scenarios-app .scene-header { position:absolute; inset:25px 26px auto; z-index:6; display:grid; grid-template-columns:minmax(0,1fr) auto; gap:24px; align-items:start; pointer-events:none; }
+.mission-scenarios-app .scene-header .viewer-title { position:static; max-width:100%; min-width:0; }
+.mission-scenarios-app .scene-header .presentation-readings { position:static; inset:auto; transform:none; width:auto; min-width:0; display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:20px; padding:14px 18px; }
+.mission-scenarios-app.presentation-mode .scene-header { inset:32px 35px auto; }
+.mission-scenarios-app .presentation-readings > div { min-width:0; }
+.mission-scenarios-app .presentation-readings small { white-space:normal; }
+.mission-scenarios-app .presentation-readings > span:only-child { grid-column:1/-1; }
+.mission-scenarios-app .scene-controls-dock { position:absolute; inset:auto 18px 14px; z-index:10; display:flex; flex-direction:column; gap:8px; padding:8px 10px; border-radius:6px; background:linear-gradient(transparent,#0c0f11bd); pointer-events:none; }
+.mission-scenarios-app .scene-controls-row { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:10px 18px; min-width:0; }
+.mission-scenarios-app .scene-controls-dock .scene-body-controls,
+.mission-scenarios-app .scene-controls-dock .scene-corner-controls { position:static; inset:auto; transform:none; max-width:100%; display:flex; flex-wrap:wrap; flex-direction:row; align-items:center; gap:7px; }
+.mission-scenarios-app .scene-controls-dock .scene-corner-controls { margin-left:auto; flex-shrink:0; }
+.mission-scenarios-app .scene-controls-dock button { pointer-events:auto; }
+.mission-scenarios-app .scene-controls-dock .surface-method,
+.mission-scenarios-app .scene-controls-dock .global-quality-badge { position:static; inset:auto; display:block; max-width:100%; padding:0; border:0; background:none; text-align:left; margin:0; font:400 10px/1.5 var(--mono); color:#b3b9bd; text-shadow:0 1px 4px #000; }
+.mission-scenarios-app .scene-controls-guidance { margin:0; color:#bec5c9; font-size:11px; line-height:1.5; text-shadow:0 1px 4px #000; }
+.mission-scenarios-app .scene-controls-dock .scene-body-controls > button { max-width:100%; }
+.mission-scenarios-app .scene-pick-hint,
+.mission-scenarios-app .scene-analysis-status,
+.mission-scenarios-app .scene-candidate-controls,
+.mission-scenarios-app .guide-card { top:var(--scene-overlay-top,160px); bottom:auto; max-height:var(--scene-overlay-height,calc(100% - 280px)); overflow-y:auto; overscroll-behavior:contain; }
+.mission-scenarios-app .scene-analysis-status { left:26px; right:auto; }
+.mission-scenarios-app .scene-candidate-controls { left:26px; right:auto; width:min(350px,calc(100% - 52px)); }
+.mission-scenarios-app .scene-candidate-actions { position:sticky; bottom:0; background:#191e21; padding-top:8px; }
+.mission-scenarios-app .guide-card { padding:18px; }
+.mission-scenarios-app .guide-card > .eyebrow { display:block; padding-right:32px; }
+.mission-scenarios-app .guide-card h3 { font-size:21px; }
+.mission-scenarios-app .guide-controls { position:sticky; bottom:0; z-index:1; background:#1f1f20; padding-top:8px; margin-top:13px; }
+.mission-scenarios-app .viewer.tour-active .scene-header,
+.mission-scenarios-app .viewer.tour-active .scene-analysis-status,
+.mission-scenarios-app .viewer[data-scene-short="true"].is-picking .scene-header { display:none; }
+.mission-scenarios-app .viewer[data-scene-short="true"] .mode-context { display:none; }
+.mission-scenarios-app.mission-open.results-open .results-panel { position:static; width:auto; box-shadow:none; }
+.mission-scenarios-app.mission-open.results-open .workspace { grid-template-columns:var(--mission-width) minmax(0,1fr) var(--results-width); }
+.utc-popover { max-height:calc(100dvh - 24px); overflow-y:auto; overscroll-behavior:contain; }
+@container (max-width:1000px) {
+  .mission-scenarios-app .scene-header { grid-template-columns:minmax(0,1fr); gap:16px; }
+  .mission-scenarios-app .scene-header .presentation-readings { width:max-content; max-width:100%; }
+}
+@container (max-width:480px) {
+  .mission-scenarios-app .scene-header .presentation-readings { width:100%; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; padding:12px; }
+  .mission-scenarios-app .presentation-readings .presentation-energy { grid-column:1/-1; border-left:0; border-top:1px solid #626b6a; padding:10px 0 0; }
+  .mission-scenarios-app .scene-controls-dock { left:12px; right:12px; }
+  .mission-scenarios-app .scene-controls-guidance { display:none; }
+}
+@media (min-width:761px) and (max-width:1299px) {
+  .mission-scenarios-app.mission-open.results-open .mission-panel { display:none; }
+  .mission-scenarios-app.mission-open.results-open .workspace { grid-template-columns:minmax(0,1fr) var(--results-width); }
+}
+@media (min-width:761px) and (max-height:760px) {
+  .mission-scenarios-app { height:auto; min-height:100dvh; overflow:visible; }
+  .mission-scenarios-app .workspace { flex:0 0 380px; height:380px; min-height:380px; }
+  .mission-scenarios-app.presentation-mode .workspace { flex-basis:460px; height:460px; min-height:460px; }
+}
+@media (max-width:760px) {
+  .mission-scenarios-app .scene-header,
+  .mission-scenarios-app.presentation-mode .scene-header { inset:23px 22px auto; gap:14px; }
+  .mission-scenarios-app .scene-controls-dock .scene-body-controls { gap:8px; }
 }

@@ -11,6 +11,76 @@ export interface SceneObserverMarker extends LunarGroundPoint {
   panelNormalEnu?: { east: number; north: number; up: number };
 }
 
+export interface SceneMarkerAnchor { id: string; x: number; y: number }
+export interface SceneOverlayRect { x: number; y: number; width: number; height: number }
+export interface SceneMarkerBadge extends SceneMarkerAnchor { anchorX: number; anchorY: number; size: number }
+
+export function sceneCaptionOwner(intent: { focused?: string | null; hovered?: string | null; candidate?: string | null; active?: string | null }, visibleIds: ReadonlySet<string>) {
+  return [intent.focused, intent.hovered, intent.candidate, intent.active].find((id): id is string => Boolean(id && visibleIds.has(id))) ?? null;
+}
+
+const overlaps = (a: SceneOverlayRect, b: SceneOverlayRect, gap = 0) => a.x < b.x + b.width + gap - 0.001 && a.x + a.width + gap > b.x + 0.001 && a.y < b.y + b.height + gap - 0.001 && a.y + a.height + gap > b.y + 0.001;
+const badgeRect = (badge: SceneMarkerBadge): SceneOverlayRect => ({ x: badge.x - badge.size / 2, y: badge.y - badge.size / 2, width: badge.size, height: badge.size });
+
+/** A/B/candidate badges stay near their real projected anchors; only labels move. */
+export function layoutSceneMarkerBadges(anchors: readonly SceneMarkerAnchor[], width: number, height: number, size: number, padding = 12, gap = 10): SceneMarkerBadge[] {
+  const clamp = (value: number, extent: number) => Math.max(Math.min(extent / 2, padding + size / 2), Math.min(Math.max(extent / 2, extent - padding - size / 2), value));
+  const inputs = anchors.filter(anchor => Number.isFinite(anchor.x) && Number.isFinite(anchor.y));
+  const initial = inputs.map(anchor => ({ id: anchor.id, anchorX: anchor.x, anchorY: anchor.y, x: clamp(anchor.x, width), y: clamp(anchor.y, height), size }));
+  if (!initial.some((a, i) => initial.some((b, j) => j > i && overlaps(badgeRect(a), badgeRect(b), gap)))) return initial;
+  const step = size + gap, offsets = [0, -step / 2, step / 2, -step, step];
+  const choices = initial.map(anchor => {
+    const unique = new Map<string, { badge: SceneMarkerBadge; cost: number }>();
+    for (const dx of offsets) for (const dy of offsets) {
+      const badge = { ...anchor, x: clamp(anchor.x + dx, width), y: clamp(anchor.y + dy, height) };
+      const displacementX = badge.x - anchor.anchorX, displacementY = badge.y - anchor.anchorY;
+      const horizontalPreference = anchor.id === 'A' ? Math.max(0, displacementX) : anchor.id === 'B' ? Math.max(0, -displacementX) : 0;
+      const preference = anchor.id === 'candidate' ? Math.max(0, displacementY) : Math.abs(displacementY) * 0.01 + horizontalPreference * 0.01;
+      const cost = displacementX ** 2 + displacementY ** 2 + preference;
+      unique.set(`${badge.x.toFixed(3)},${badge.y.toFixed(3)}`, { badge, cost });
+    }
+    return [...unique.values()].sort((a, b) => a.cost - b.cost);
+  });
+  let best: SceneMarkerBadge[] | null = null, bestCost = Infinity;
+  const search = (index: number, placed: SceneMarkerBadge[], cost: number) => {
+    if (cost >= bestCost) return;
+    if (index === choices.length) { best = [...placed]; bestCost = cost; return; }
+    for (const choice of choices[index]) {
+      if (cost + choice.cost >= bestCost) break;
+      if (placed.some(other => overlaps(badgeRect(choice.badge), badgeRect(other), gap))) continue;
+      placed.push(choice.badge); search(index + 1, placed, cost + choice.cost); placed.pop();
+    }
+  };
+  search(0, [], 0);
+  return best ?? initial;
+}
+
+/** Place the single caption around its owner while avoiding badges and HUD. */
+export function layoutSceneMarkerCaption(ownerId: string, badges: readonly SceneMarkerBadge[], width: number, height: number, captionSize: { width: number; height: number }, hud: readonly SceneOverlayRect[] = [], padding = 12, gap = 10): SceneOverlayRect | null {
+  const owner = badges.find(badge => badge.id === ownerId);
+  if (!owner) return null;
+  const w = Math.min(captionSize.width, width - padding * 2), h = Math.min(captionSize.height, height - padding * 2);
+  if (w <= 0 || h <= 0) return null;
+  const positions: { x: number; y: number }[] = [];
+  const around = (rect: SceneOverlayRect) => positions.push(
+    { x: rect.x + rect.width + gap, y: owner.y - h / 2 },
+    { x: rect.x - w - gap, y: owner.y - h / 2 },
+    { x: owner.x - w / 2, y: rect.y - h - gap },
+    { x: owner.x - w / 2, y: rect.y + rect.height + gap },
+  );
+  around(badgeRect(owner));
+  for (const rect of [...badges.map(badgeRect), ...hud]) around(rect);
+  for (const x of [padding, (width - w) / 2, width - w - padding]) for (const y of [padding, (height - h) / 2, height - h - padding]) positions.push({ x, y });
+  let best: SceneOverlayRect | null = null, bestCost = Infinity;
+  for (const point of positions) {
+    const rect = { x: Math.max(padding, Math.min(width - w - padding, point.x)), y: Math.max(padding, Math.min(height - h - padding, point.y)), width: w, height: h };
+    if (badges.some(badge => overlaps(rect, badgeRect(badge), gap)) || hud.some(blocked => overlaps(rect, blocked, 6))) continue;
+    const cost = (rect.x + w / 2 - owner.x) ** 2 + (rect.y + h / 2 - owner.y) ** 2;
+    if (cost < bestCost) { bestCost = cost; best = rect; }
+  }
+  return best;
+}
+
 export function observerPose(origin: LunarFrameOrigin, observer: LunarGroundPoint) {
   const point = lunarPointToScene(origin, observer);
   const axes = lunarObserverAxes(origin, observer);

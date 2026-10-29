@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { Mesh, Vector3 } from 'three';
 import { disposeObject } from './sceneAssets';
-import { scenarioObserverMarker } from './sceneScenarioVisuals';
+import { layoutSceneMarkerBadges, layoutSceneMarkerCaption, scenarioObserverMarker, sceneCaptionOwner } from './sceneScenarioVisuals';
 
 const origin = { latitudeDeg: -89.78, longitudeDeg: -137.39, groundHeightM: 1_592.5, referenceRadiusM: 1_737_400 };
 
@@ -26,5 +26,47 @@ describe('locked scenario illustration', () => {
     expect(marker.position.length()).toBeLessThan(0.000001);
     expect(marker.userData.observerId).toBe('B');
     disposeObject(marker);
+  });
+});
+
+describe('scenario marker captions', () => {
+  it('selects exactly one visible owner, preserving keyboard focus ahead of hover', () => {
+    const visible = new Set(['A', 'B', 'candidate']);
+    expect(sceneCaptionOwner({ focused: 'A', hovered: 'B', candidate: 'candidate', active: 'B' }, visible)).toBe('A');
+    expect(sceneCaptionOwner({ focused: 'A', hovered: null, active: 'B' }, visible)).toBe('A');
+    expect(sceneCaptionOwner({ hovered: 'B', active: 'A' }, visible)).toBe('B');
+    expect(sceneCaptionOwner({ focused: 'offscreen', hovered: 'other-region', active: 'A' }, visible)).toBe('A');
+    expect(sceneCaptionOwner({ active: 'offscreen' }, visible)).toBeNull();
+  });
+
+  it('separates coincident and nearby touch badges at every viewport edge without moving their true anchors', () => {
+    for (const [x, y] of [[320, 180], [2, 2], [638, 2], [2, 358], [638, 358]]) {
+      const anchors = [{ id: 'A', x, y }, { id: 'B', x: x + 3, y: y + 2 }, { id: 'candidate', x, y }];
+      const badges = layoutSceneMarkerBadges(anchors, 640, 360, 44);
+      expect(badges).toHaveLength(3);
+      for (const badge of badges) {
+        const anchor = anchors.find(point => point.id === badge.id)!;
+        expect(badge.anchorX).toBe(anchor.x); expect(badge.anchorY).toBe(anchor.y);
+        expect(badge.x - 22).toBeGreaterThanOrEqual(12); expect(badge.x + 22).toBeLessThanOrEqual(628);
+        expect(badge.y - 22).toBeGreaterThanOrEqual(12); expect(badge.y + 22).toBeLessThanOrEqual(348);
+      }
+      for (let i = 0; i < badges.length; i++) for (let j = i + 1; j < badges.length; j++) {
+        expect(Math.abs(badges[i].x - badges[j].x) >= 54 || Math.abs(badges[i].y - badges[j].y) >= 54).toBe(true);
+      }
+    }
+  });
+
+  it('places the shared caption inside the viewport and away from all badges and visible HUD', () => {
+    const badges = layoutSceneMarkerBadges([{ id: 'A', x: 610, y: 120 }, { id: 'B', x: 611, y: 121 }], 640, 360, 44);
+    const hud = [{ x: 400, y: 30, width: 220, height: 110 }, { x: 400, y: 260, width: 220, height: 80 }];
+    const caption = layoutSceneMarkerCaption('A', badges, 640, 360, { width: 180, height: 34 }, hud);
+    expect(caption).not.toBeNull();
+    expect(caption!.x).toBeGreaterThanOrEqual(12); expect(caption!.x + caption!.width).toBeLessThanOrEqual(628);
+    expect(caption!.y).toBeGreaterThanOrEqual(12); expect(caption!.y + caption!.height).toBeLessThanOrEqual(348);
+    for (const blocked of [...hud, ...badges.map(badge => ({ x: badge.x - 22, y: badge.y - 22, width: 44, height: 44 }))]) {
+      const intersects = caption!.x < blocked.x + blocked.width && caption!.x + caption!.width > blocked.x && caption!.y < blocked.y + blocked.height && caption!.y + caption!.height > blocked.y;
+      expect(intersects).toBe(false);
+    }
+    expect(layoutSceneMarkerCaption('A', badges, 640, 360, { width: 180, height: 34 }, [{ x: 0, y: 0, width: 640, height: 360 }])).toBeNull();
   });
 });

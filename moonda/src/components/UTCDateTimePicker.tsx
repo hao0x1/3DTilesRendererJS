@@ -32,6 +32,10 @@ const timeLabel = new Intl.DateTimeFormat('en', { timeZone: 'UTC', hour: '2-digi
 const weekdays = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
 const weekdayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 const padded = (value: number) => String(value).padStart(2, '0');
+const focusableSelector = 'button, input, select, textarea, a[href], summary, [tabindex], [contenteditable="true"]';
+const tabbableElements = (container: ParentNode) => Array.from(container.querySelectorAll<HTMLElement>(focusableSelector))
+  .filter(element => element.tabIndex >= 0 && !element.matches(':disabled') && !element.closest('[hidden], [inert], [aria-hidden="true"]') && element.getClientRects().length > 0 && getComputedStyle(element).visibility === 'visible')
+  .sort((a, b) => (a.tabIndex || Number.MAX_SAFE_INTEGER) - (b.tabIndex || Number.MAX_SAFE_INTEGER));
 
 export default function UTCDateTimePicker({ value, min, max, onChange }: UTCDateTimePickerProps) {
   const minimum = Date.parse(min);
@@ -59,6 +63,32 @@ export default function UTCDateTimePicker({ value, min, max, onChange }: UTCDate
   const close = (restoreFocus = false) => {
     setOpen(false);
     if (restoreFocus) trigger.current?.focus();
+  };
+
+  const handlePopoverTab = (event: KeyboardEvent<HTMLDivElement>) => {
+    const panel = popover.current;
+    const anchor = trigger.current;
+    if (!open || event.key !== 'Tab' || event.altKey || event.ctrlKey || event.metaKey || !panel || !anchor) return;
+    const controls = tabbableElements(panel);
+    const atFirst = document.activeElement === controls[0];
+    const atLast = document.activeElement === controls[controls.length - 1];
+    if (!(event.shiftKey ? atFirst : atLast)) return;
+
+    event.preventDefault();
+    event.stopPropagation();
+    if (event.shiftKey) {
+      // The popup follows its trigger in the logical form order, even though
+      // its portal is physically the last child of document.body.
+      close(true);
+      return;
+    }
+    const pageControls = tabbableElements(document).filter(element => !panel.contains(element));
+    const anchorIndex = pageControls.indexOf(anchor);
+    const next = anchorIndex < 0 ? undefined : pageControls[anchorIndex + 1];
+    close();
+    // Continue through the form; returning to the trigger is a safe fallback
+    // when the picker itself is the last control in the document.
+    (next ?? anchor).focus();
   };
 
   const show = () => {
@@ -175,6 +205,7 @@ export default function UTCDateTimePicker({ value, min, max, onChange }: UTCDate
   return <div className="utc-picker" ref={root} onBlur={event => {
     if (open && event.relatedTarget instanceof Node && !event.currentTarget.contains(event.relatedTarget) && !popover.current?.contains(event.relatedTarget)) close();
   }} onKeyDown={event => {
+    handlePopoverTab(event);
     if (open && event.key === 'Escape') {
       event.preventDefault();
       event.stopPropagation();

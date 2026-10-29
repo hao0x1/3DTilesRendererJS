@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { Ellipsoid, GlobeControls, TilesRenderer } from '3d-tiles-renderer/three';
@@ -9,7 +9,8 @@ import { anchorLanderToTerrain, applyLunarRelief, createTerrainShadowMaterial, d
 import type { ImageAsset, TerrainVisualEntry, TerrainVisualManifest, VisualAssetManifest } from './sceneAssets';
 import { lunarArcDestination, lunarArcOffsets, lunarPointToScene, scenePointToLunar } from './sceneCoordinates';
 import type { LunarFrameOrigin, LunarGroundPoint, ScenePoint } from './sceneCoordinates';
-import { observerPose, scenarioObserverMarker } from './sceneScenarioVisuals';
+import { layoutSceneMarkerBadges, layoutSceneMarkerCaption, observerPose, scenarioObserverMarker, sceneCaptionOwner } from './sceneScenarioVisuals';
+import type { SceneMarkerAnchor, SceneMarkerBadge, SceneOverlayRect } from './sceneScenarioVisuals';
 import type { SceneObserverMarker } from './sceneScenarioVisuals';
 
 export type { SceneObserverMarker } from './sceneScenarioVisuals';
@@ -61,6 +62,8 @@ export interface SceneProps {
   onTerrainPick?: (pick: SceneTerrainPick) => void;
   onLockCandidate?: () => void;
   onCancelCandidate?: () => void;
+  integratedControls?: boolean;
+  guidanceText?: string;
 }
 
 const MOON_RADIUS = 1_737_400;
@@ -106,11 +109,14 @@ function horizonGeometry(site: Pick<Site, 'horizon' | 'observerHeightM'>, enable
 
 export default function Scene(props: SceneProps) {
   const container = useRef<HTMLDivElement>(null);
-  const runtime = useRef<{ update: (next: SceneProps) => void; focus: (body: 'sun' | 'earth' | 'reset' | 'marker') => void; setInspectionLighting: (enabled: boolean) => void } | null>(null);
+  const runtime = useRef<{ update: (next: SceneProps) => void; focus: (body: 'sun' | 'earth' | 'reset' | 'marker') => void; setInspectionLighting: (enabled: boolean) => void; refreshLabels: () => void } | null>(null);
   const currentProps = useRef(props);
   const labels = useRef<Record<string, HTMLButtonElement | null>>({});
   const scenarioLabels = useRef<Record<string, HTMLButtonElement | null>>({});
   const candidateLabel = useRef<HTMLDivElement | null>(null);
+  const markerCaption = useRef<HTMLDivElement | null>(null);
+  const captionIntent = useRef<{ focused: string | null; hovered: string | null }>({ focused: null, hovered: null });
+  const markerCaptionId = useId();
   const [error, setError] = useState('');
   const [generation, setGeneration] = useState(0);
   const [loadingTerrain, setLoadingTerrain] = useState(false);
@@ -557,19 +563,58 @@ export default function Scene(props: SceneProps) {
       renderer.shadowMap.needsUpdate = true;
     }
 
+    function labelCaptionOwner(elements: Map<string, HTMLElement>, badges: readonly SceneMarkerBadge[], active: string | undefined, candidate: string | null = null) {
+      const intent = captionIntent.current;
+      if (intent.focused && elements.get(intent.focused) !== document.activeElement) intent.focused = null;
+      if (intent.hovered && !elements.get(intent.hovered)?.matches(':hover')) intent.hovered = null;
+      return sceneCaptionOwner({ ...intent, candidate, active }, new Set(badges.map(badge => badge.id)));
+    }
+
+    function placeLabelCaption(elements: Map<string, HTMLElement>, badges: readonly SceneMarkerBadge[], owner: string | null, text: string, width: number, height: number) {
+      const caption = markerCaption.current;
+      if (!caption) return;
+      if (!owner) { caption.hidden = true; caption.setAttribute('aria-hidden', 'true'); delete caption.dataset.owner; return; }
+      if (caption.textContent !== text) caption.textContent = text;
+      caption.hidden = false; caption.style.visibility = 'hidden'; caption.style.width = 'max-content';
+      caption.style.maxWidth = `${Math.max(1, Math.min(260, width - 24))}px`;
+      const captionBounds = caption.getBoundingClientRect();
+      const hostBounds = host!.getBoundingClientRect();
+      const hud: SceneOverlayRect[] = [];
+      const overlayRoot = host!.closest('.viewer') ?? host!.parentElement;
+      for (const element of overlayRoot?.querySelectorAll<HTMLElement>('.viewer-title,.scene-body-controls,.scene-corner-controls,.guide-card,.scene-candidate-controls,.presentation-readings,.scene-pick-hint,.view-guidance,[data-scene-hud]') ?? []) {
+        const bounds = element.getBoundingClientRect(), style = getComputedStyle(element);
+        if (!bounds.width || !bounds.height || style.visibility === 'hidden' || Number(style.opacity) === 0 || bounds.right <= hostBounds.left || bounds.left >= hostBounds.right || bounds.bottom <= hostBounds.top || bounds.top >= hostBounds.bottom) continue;
+        const x = Math.max(0, bounds.left - hostBounds.left), y = Math.max(0, bounds.top - hostBounds.top);
+        hud.push({ x, y, width: Math.min(width, bounds.right - hostBounds.left) - x, height: Math.min(height, bounds.bottom - hostBounds.top) - y });
+      }
+      const placement = layoutSceneMarkerCaption(owner, badges, width, height, { width: captionBounds.width || 180, height: captionBounds.height || 34 }, hud);
+      if (!placement) { caption.hidden = true; caption.setAttribute('aria-hidden', 'true'); delete caption.dataset.owner; return; }
+      caption.style.left = `${placement.x}px`; caption.style.top = `${placement.y}px`;
+      caption.style.visibility = 'visible'; caption.setAttribute('aria-hidden', 'false'); caption.dataset.owner = owner;
+      const ownerElement = elements.get(owner);
+      if (ownerElement instanceof HTMLButtonElement) ownerElement.setAttribute('aria-describedby', markerCaptionId);
+    }
+
     function updateLabels() {
+      const width = host!.clientWidth, height = host!.clientHeight;
       const placed: THREE.Vector2[] = [];
+      const globeElements = new Map<string, HTMLElement>();
+      const globeBadges: SceneMarkerBadge[] = [];
       const ordered = [...state.sites].sort((a, b) => Number(b.id === state.selectedSite.id) - Number(a.id === state.selectedSite.id));
       for (const site of ordered) {
         const element = labels.current[site.id];
         if (!element) continue;
+        globeElements.set(site.id, element); element.removeAttribute('aria-describedby');
         const point = location(site, (site.terrain.centerHeightM ?? 0) + 2_000);
         const normal = point.clone().normalize();
         const projected = point.clone().project(globeCamera);
         const screen = new THREE.Vector2((projected.x * 0.5 + 0.5) * host!.clientWidth, (-projected.y * 0.5 + 0.5) * host!.clientHeight);
         const onFront = normal.dot(globeCamera.position.clone().sub(point).normalize()) > 0.02;
         const visible = state.mode === 'globe' && onFront && projected.z > -1 && projected.z < 1 && Math.abs(projected.x) < 0.95 && Math.abs(projected.y) < 0.95 && placed.every(previous => previous.distanceTo(screen) > 32);
-        if (visible) placed.push(screen);
+        if (visible) {
+          placed.push(screen);
+          globeBadges.push({ id: site.id, x: screen.x, y: screen.y, anchorX: screen.x, anchorY: screen.y, size: Math.max(30, element.offsetWidth, element.offsetHeight) });
+        }
         element.style.opacity = visible ? '1' : '0';
         element.style.pointerEvents = visible ? 'auto' : 'none';
         element.style.left = `${screen.x}px`;
@@ -577,37 +622,51 @@ export default function Scene(props: SceneProps) {
         element.setAttribute('aria-hidden', visible ? 'false' : 'true');
         element.tabIndex = visible ? 0 : -1;
       }
+      if (state.mode === 'globe') {
+        const owner = labelCaptionOwner(globeElements, globeBadges, state.selectedSite.id);
+        placeLabelCaption(globeElements, globeBadges, owner, state.sites.find(site => site.id === owner)?.name ?? '', width, height);
+        return;
+      }
       if (state.mode !== 'terrain') return;
-      const camera = state.mode === 'terrain' ? terrainCamera : surfaceCamera;
-      const projectLabel = (element: HTMLElement | null | undefined, point: THREE.Vector3, show: boolean, offsetX = 0, offsetY = 0) => {
-        if (!element) return;
-        const projected = point.project(camera);
-        const visible = show && state.mode === 'terrain' && projected.z > -1 && projected.z < 1 && Math.abs(projected.x) < 0.97 && Math.abs(projected.y) < 0.95;
-        element.style.opacity = visible ? '1' : '0'; element.style.pointerEvents = visible && element instanceof HTMLButtonElement ? 'auto' : 'none';
-        element.style.left = `${(projected.x * 0.5 + 0.5) * host!.clientWidth + offsetX}px`;
-        element.style.top = `${(-projected.y * 0.5 + 0.5) * host!.clientHeight + offsetY}px`;
-        element.style.setProperty('--label-offset-x', `${offsetX}px`); element.style.setProperty('--label-offset-y', `${offsetY}px`);
-        element.setAttribute('aria-hidden', visible ? 'false' : 'true');
-        if (element instanceof HTMLButtonElement) element.tabIndex = visible ? 0 : -1;
+      const camera = terrainCamera;
+      const elements = new Map<string, HTMLElement>();
+      for (const [id, element] of Object.entries(scenarioLabels.current)) if (element) elements.set(id, element);
+      if (candidateLabel.current) elements.set('candidate', candidateLabel.current);
+      for (const element of elements.values()) {
+        element.style.opacity = '0'; element.style.pointerEvents = 'none';
+        element.setAttribute('aria-hidden', 'true'); element.removeAttribute('aria-describedby');
+        if (element instanceof HTMLButtonElement) element.tabIndex = -1;
+      }
+      const anchors: SceneMarkerAnchor[] = [];
+      const addAnchor = (id: string, point: THREE.Vector3) => {
+        const screen = point.project(camera);
+        if (!elements.has(id) || screen.z <= -1 || screen.z >= 1 || Math.abs(screen.x) > 1 || Math.abs(screen.y) > 1) return;
+        anchors.push({ id, x: (screen.x * 0.5 + 0.5) * width, y: (-screen.y * 0.5 + 0.5) * height });
       };
-      const anchors = (state.observers ?? []).filter(observer => observer.regionId === state.selectedSite.id).map(observer => {
-        const pose = observerPose(frameOrigin(), observer);
-        const height = observer.id === state.activeObserverId ? Math.max(observer.antennaHeightM, observer.panelHeightM) : 4;
-        const point = pose.point.addScaledVector(pose.up, height + 1), screen = point.clone().project(camera);
-        return { observer, point, screen: new THREE.Vector2(screen.x * host!.clientWidth / 2, screen.y * host!.clientHeight / 2) };
-      });
       for (const observer of state.observers ?? []) {
-        if (observer.regionId !== state.selectedSite.id) projectLabel(scenarioLabels.current[observer.id], new THREE.Vector3(), false);
+        if (observer.regionId !== state.selectedSite.id) continue;
+        const pose = observerPose(frameOrigin(), observer);
+        const markerHeight = observer.id === state.activeObserverId ? Math.max(observer.antennaHeightM, observer.panelHeightM) : 4;
+        addAnchor(observer.id, pose.point.addScaledVector(pose.up, markerHeight + 1));
       }
-      for (const anchor of anchors) {
-        const overlaps = anchors.some(other => other !== anchor && other.screen.distanceTo(anchor.screen) < 70);
-        projectLabel(scenarioLabels.current[anchor.observer.id], anchor.point, true, overlaps ? anchor.observer.id === 'A' ? -24 : 24 : 0);
+      const candidate = state.candidate?.regionId === state.selectedSite.id ? state.candidate : null;
+      if (candidate) addAnchor('candidate', new THREE.Vector3(candidate.displayPoint.x, candidate.displayPoint.y + 2, candidate.displayPoint.z));
+      const badgeSize = Math.max(31, ...[...elements.values()].map(element => Math.max(element.offsetWidth, element.offsetHeight)));
+      const badges = layoutSceneMarkerBadges(anchors, width, height, badgeSize);
+      for (const badge of badges) {
+        const element = elements.get(badge.id)!;
+        element.style.opacity = '1'; element.style.pointerEvents = element instanceof HTMLButtonElement ? 'auto' : 'none';
+        element.style.left = `${badge.x}px`; element.style.top = `${badge.y}px`;
+        const dx = badge.anchorX - badge.x, dy = badge.anchorY - badge.y;
+        element.style.setProperty('--label-offset-x', `${-dx}px`); element.style.setProperty('--label-offset-y', `${-dy}px`);
+        element.style.setProperty('--label-leader-length', `${Math.hypot(dx, dy)}px`);
+        element.style.setProperty('--label-leader-angle', `${Math.atan2(dy, dx)}rad`);
+        element.setAttribute('aria-hidden', 'false');
+        if (element instanceof HTMLButtonElement) element.tabIndex = 0;
       }
-      const candidate = state.candidate;
-      const candidatePoint = candidate ? new THREE.Vector3(candidate.displayPoint.x, candidate.displayPoint.y + 2, candidate.displayPoint.z) : new THREE.Vector3();
-      const candidateScreen = candidatePoint.clone().project(camera);
-      const candidateOverlap = anchors.some(anchor => anchor.screen.distanceTo(new THREE.Vector2(candidateScreen.x * host!.clientWidth / 2, candidateScreen.y * host!.clientHeight / 2)) < 70);
-      projectLabel(candidateLabel.current, candidatePoint, Boolean(candidate && candidate.regionId === state.selectedSite.id), 0, candidateOverlap ? -38 : 0);
+      const owner = labelCaptionOwner(elements, badges, state.activeObserverId, candidate ? 'candidate' : null);
+      const text = owner === 'candidate' ? candidate?.status === 'pending' ? 'Candidate · Checking point' : candidate?.status === 'invalid' ? 'Candidate · Unavailable point' : candidate?.supported ? 'Candidate · Preview point' : 'Candidate · Outside prepared area' : `${owner} · ${owner === state.activeObserverId ? 'Active observer' : 'Locked point'}`;
+      placeLabelCaption(elements, badges, owner, text, width, height);
     }
 
     function updateSurfaceOrientation() {
@@ -843,9 +902,23 @@ export default function Scene(props: SceneProps) {
     renderer.domElement.addEventListener('keydown', keydown);
     renderer.domElement.addEventListener('webglcontextlost', lostContext);
     document.addEventListener('visibilitychange', invalidate);
+    const layoutSurface = host.closest('.viewer');
+    const sceneLayoutChanged = () => {
+      // HUD-only changes need not touch the camera or props. Hide stale text
+      // synchronously, then measure its new free space on the next frame.
+      const caption = markerCaption.current;
+      if (caption) {
+        caption.hidden = true; caption.style.visibility = 'hidden';
+        caption.setAttribute('aria-hidden', 'true'); delete caption.dataset.owner;
+      }
+      for (const element of [...Object.values(labels.current), ...Object.values(scenarioLabels.current)]) element?.removeAttribute('aria-describedby');
+      invalidate();
+    };
+    layoutSurface?.addEventListener('moonda:scene-layout', sceneLayoutChanged);
     const observer = new ResizeObserver(resize); observer.observe(host);
     runtime.current = {
       update,
+      refreshLabels: invalidate,
       setInspectionLighting(enabled) {
         if (inspectionLighting !== enabled) renderer.shadowMap.needsUpdate = true;
         inspectionLighting = enabled; invalidate();
@@ -891,6 +964,7 @@ export default function Scene(props: SceneProps) {
     return () => {
       disposed = true; abort.abort(); if (frame) cancelAnimationFrame(frame);
       observer.disconnect(); document.removeEventListener('visibilitychange', invalidate);
+      layoutSurface?.removeEventListener('moonda:scene-layout', sceneLayoutChanged);
       renderer.domElement.removeEventListener('pointerdown', pointerDown, true);
       renderer.domElement.removeEventListener('pointermove', pointerMove);
       renderer.domElement.removeEventListener('pointerup', pointerUp);
@@ -919,31 +993,48 @@ export default function Scene(props: SceneProps) {
   const candidate = props.candidate?.regionId === props.selectedSite.id ? props.candidate : null;
   const analysisReady = !props.analysisStatus || props.analysisStatus === 'ready';
 
-  return <div className={`lunar-scene lunar-scene--${props.mode}`}>
+  const changeMarkerIntent = (kind: 'focused' | 'hovered', id: string | null) => {
+    captionIntent.current[kind] = id;
+    runtime.current?.refreshLabels();
+  };
+  const instructions = props.mode === 'globe' ? 'Drag to orbit · Scroll to explore' : props.mode === 'terrain' ? 'Drag to orbit · Right-drag to pan · Scroll to zoom' : 'Drag to look · Scroll for optical zoom';
+  const method = props.mode === 'globe' ? visualQuality : !analysisReady ? 'Observer analysis unavailable · Camera exploration remains independent' : props.mode === 'terrain' ? `${loadingTerrain ? 'Loading regional detail…' : terrainQuality} · ${inspectionLight ? 'Inspection light (display only)' : 'Sun lighting (estimated shadows)'} · Analysis remains at the locked observer` : `${props.activeObserverId ? `Scenario ${props.activeObserverId} · ` : ''}${surfaceView ? resolvedView === 'panel' ? 'Panel viewpoint' : 'Antenna viewpoint' : 'Fixed observer'} ${surfaceHeight} m above ground · ${loadingTerrain ? 'Loading local detail…' : terrainQuality} · Earth orientation is illustrative`;
+  const bodyControls = props.mode === 'surface' ? <div className="scene-body-controls"><button type="button" disabled={!analysisReady} aria-pressed={resolvedView === 'panel'} onClick={() => runtime.current?.focus('sun')}><Sun size={16} />{props.analysisObservers ? 'Panel · Look toward Sun' : 'Look toward Sun'}</button><button type="button" disabled={!analysisReady} aria-pressed={resolvedView === 'antenna'} onClick={() => runtime.current?.focus('earth')}><GlobeHemisphereWest size={16} />{props.analysisObservers ? 'Antenna · Look toward Earth' : 'Look toward Earth'}</button></div>
+    : props.mode === 'terrain' ? <div className="scene-body-controls"><button type="button" title="Inspect an original generic lander and the fixed analysis observer mast; the lander is an illustrative scale reference." onClick={() => runtime.current?.focus('marker')}><Crosshair size={16} />Inspect scale reference</button><div className="scene-lighting-controls" role="group" aria-label="Terrain display lighting"><button type="button" aria-pressed={inspectionLight} title="Display-only fill light helps you inspect shaded terrain. Visibility analysis is unchanged." onClick={() => changeInspectionLighting(true)}>Inspection light</button><button type="button" aria-pressed={!inspectionLight} title="Use the selected time's modeled Sun direction. Cast shadows are display estimates; visibility results use the validated horizon." onClick={() => changeInspectionLighting(false)}><Sun size={14} />Sun lighting</button></div></div> : null;
+  const cornerControls = <div className="scene-corner-controls"><button type="button" aria-label="Reset camera" title="Reset camera" onClick={() => runtime.current?.focus('reset')}><ArrowCounterClockwise size={18} /></button>{props.onModeChange && <>
+    {props.mode === 'terrain' && <button type="button" aria-label="Go to fixed horizon observer" title="Fixed horizon observer" onClick={() => props.onModeChange?.('surface')}><Crosshair size={18} /></button>}
+    <button type="button" aria-label={props.mode === 'globe' ? 'Explore local terrain' : props.mode === 'surface' ? 'Explore terrain freely' : 'Return to lunar overview'} title={props.mode === 'globe' ? 'Explore local terrain' : props.mode === 'surface' ? 'Explore terrain freely' : 'Lunar overview'} onClick={() => props.onModeChange?.(props.mode === 'terrain' ? 'globe' : 'terrain')}>{props.mode === 'globe' ? <ArrowDown size={18} /> : <ArrowsOut size={18} />}</button>
+  </>}</div>;
+  const methodLabel = <div className={props.integratedControls && props.mode === 'globe' ? 'global-quality-badge' : 'surface-method'}>{method}</div>;
+
+  return <div className={`lunar-scene lunar-scene--${props.mode}${props.integratedControls ? ' lunar-scene--integrated' : ''}`}>
     <div className="lunar-scene__canvas" ref={container} data-testid="lunar-canvas" />
     {props.mode === 'globe' && <div className="lunar-scene__pins" aria-label="Sites on the lunar globe">
-      {props.sites.map((site, index) => <button key={site.id} ref={el => { labels.current[site.id] = el; }} className={`lunar-pin ${site.id === props.selectedSite.id ? 'is-selected' : ''}`} title={site.name} aria-label={`Select ${site.name}`} onClick={() => props.onSelectSite(site.id)}><span>{String(index + 1).padStart(2, '0')}</span><strong className="lunar-pin__label">{site.name}</strong></button>)}
+      {props.sites.map((site, index) => <button key={site.id} ref={el => { labels.current[site.id] = el; }} className={`lunar-pin ${site.id === props.selectedSite.id ? 'is-selected' : ''}`} aria-label={`Select ${site.name}`}
+        onPointerEnter={event => { if (event.pointerType !== 'touch') changeMarkerIntent('hovered', site.id); }} onPointerLeave={() => changeMarkerIntent('hovered', null)} onPointerCancel={() => changeMarkerIntent('hovered', null)}
+        onFocus={() => changeMarkerIntent('focused', site.id)} onBlur={() => changeMarkerIntent('focused', null)} onClick={() => props.onSelectSite(site.id)}><span>{String(index + 1).padStart(2, '0')}</span></button>)}
     </div>}
     {props.mode === 'terrain' && <div className="lunar-scene__pins" aria-label="Locked scenario positions">
-      {(props.observers ?? []).map(observer => <button key={observer.id} ref={element => { scenarioLabels.current[observer.id] = element; }} type="button" className={`scenario-scene-label ${observer.id === props.activeObserverId ? 'is-active' : ''}`} aria-label={`Activate scenario ${observer.id}`} aria-pressed={observer.id === props.activeObserverId} onClick={() => props.onActivateObserver?.(observer.id)}><i className="scenario-scene-label__leader" aria-hidden="true" /><span>{observer.id}</span><strong>{observer.id === props.activeObserverId ? 'Active observer' : 'Locked point'}</strong></button>)}
-      {candidate && <div ref={candidateLabel} className="scenario-scene-label is-candidate"><span>+</span><strong>Candidate</strong></div>}
+      {(props.observers ?? []).map(observer => <button key={observer.id} ref={element => { scenarioLabels.current[observer.id] = element; }} type="button" style={{ opacity: 0, pointerEvents: 'none' }} tabIndex={-1} aria-hidden="true" className={`scenario-scene-label ${observer.id === props.activeObserverId ? 'is-active' : ''}`} aria-label={`Activate scenario ${observer.id}`} aria-pressed={observer.id === props.activeObserverId}
+        onPointerEnter={event => { if (event.pointerType !== 'touch') changeMarkerIntent('hovered', observer.id); }} onPointerLeave={() => changeMarkerIntent('hovered', null)} onPointerCancel={() => changeMarkerIntent('hovered', null)}
+        onFocus={() => changeMarkerIntent('focused', observer.id)} onBlur={() => changeMarkerIntent('focused', null)} onClick={() => props.onActivateObserver?.(observer.id)}><i className="scenario-scene-label__leader" aria-hidden="true" /><span>{observer.id}</span></button>)}
+      {candidate && <div ref={candidateLabel} className="scenario-scene-label is-candidate" style={{ opacity: 0, pointerEvents: 'none' }} aria-hidden="true" aria-label="Candidate landing point"><i className="scenario-scene-label__leader" aria-hidden="true" /><span>+</span></div>}
     </div>}
+    {(props.mode === 'globe' || props.mode === 'terrain') && <div className="lunar-scene__pins lunar-scene__caption-layer"><div key={props.mode} ref={markerCaption} id={markerCaptionId} className="scenario-scene-caption" role="tooltip" hidden /></div>}
     {error ? <div className="scene-fallback" role="status"><p>{error}</p><button type="button" onClick={() => { setError(''); setGeneration(n => n + 1); }}>Retry 3D view</button></div> : <>
-      <div className="scene-instructions"><span className="scene-status-dot" />{props.mode === 'globe' ? 'Drag to orbit · Scroll to explore' : props.mode === 'terrain' ? 'Drag to orbit · Right-drag to pan · Scroll to zoom' : 'Drag to look · Scroll for optical zoom'}</div>
+      {!props.integratedControls && <div className="scene-instructions"><span className="scene-status-dot" />{instructions}</div>}
       {!analysisReady && <div className="scene-pick-hint scene-analysis-status" role="status">{props.analysisStatus === 'loading' ? 'Calculating this observer… Sun, Earth and horizon appear when ready.' : 'This observer could not be calculated. Recalculate a supported point.'}</div>}
-      {props.mode === 'surface' && <div className="scene-body-controls"><button type="button" disabled={!analysisReady} aria-pressed={resolvedView === 'panel'} onClick={() => runtime.current?.focus('sun')}><Sun size={16} />{props.analysisObservers ? 'Panel · Look toward Sun' : 'Look toward Sun'}</button><button type="button" disabled={!analysisReady} aria-pressed={resolvedView === 'antenna'} onClick={() => runtime.current?.focus('earth')}><GlobeHemisphereWest size={16} />{props.analysisObservers ? 'Antenna · Look toward Earth' : 'Look toward Earth'}</button></div>}
       {props.mode === 'terrain' && props.pickingEnabled && analysisReady && <div className="scene-pick-hint" role="status">10 m selection grid · Click ground to preview · Drag to explore · Lock to recalculate</div>}
       {props.mode === 'terrain' && candidate && <div className={`scene-candidate-controls ${candidate.status === 'pending' ? 'is-loading' : !candidate.supported || candidate.status === 'invalid' ? 'is-error' : ''}`} role="status">
         <strong>Candidate · {candidate.latitudeDeg.toFixed(5)}°, {candidate.longitudeDeg.toFixed(5)}°</strong>
         <p>{candidate.message ?? (candidate.supported ? 'Preview only. Lock this point to calculate its scientific horizon.' : 'Outside the prepared area.')}</p>
         <div className="scene-candidate-actions">{props.onLockCandidate && <button type="button" disabled={!candidate.supported || candidate.status === 'invalid' || candidate.status === 'pending'} onClick={props.onLockCandidate}>Lock point</button>}{props.onCancelCandidate && <button type="button" onClick={props.onCancelCandidate}>Cancel</button>}</div>
       </div>}
-      {props.mode === 'terrain' && <div className="scene-body-controls"><button type="button" title="Inspect an original generic lander and the fixed analysis observer mast; the lander is an illustrative scale reference." onClick={() => runtime.current?.focus('marker')}><Crosshair size={16} />Inspect scale reference</button><div className="scene-lighting-controls" role="group" aria-label="Terrain display lighting"><button type="button" aria-pressed={inspectionLight} title="Display-only fill light helps you inspect shaded terrain. Visibility analysis is unchanged." onClick={() => changeInspectionLighting(true)}>Inspection light</button><button type="button" aria-pressed={!inspectionLight} title="Use the selected time's modeled Sun direction. Cast shadows are display estimates; visibility results use the validated horizon." onClick={() => changeInspectionLighting(false)}><Sun size={14} />Sun lighting</button></div></div>}
-      <div className="scene-corner-controls"><button type="button" aria-label="Reset camera" title="Reset camera" onClick={() => runtime.current?.focus('reset')}><ArrowCounterClockwise size={18} /></button>{props.onModeChange && <>
-        {props.mode === 'terrain' && <button type="button" aria-label="Go to fixed horizon observer" title="Fixed horizon observer" onClick={() => props.onModeChange?.('surface')}><Crosshair size={18} /></button>}
-        <button type="button" aria-label={props.mode === 'globe' ? 'Explore local terrain' : props.mode === 'surface' ? 'Explore terrain freely' : 'Return to lunar overview'} title={props.mode === 'globe' ? 'Explore local terrain' : props.mode === 'surface' ? 'Explore terrain freely' : 'Lunar overview'} onClick={() => props.onModeChange?.(props.mode === 'terrain' ? 'globe' : 'terrain')}>{props.mode === 'globe' ? <ArrowDown size={18} /> : <ArrowsOut size={18} />}</button>
-      </>}</div>
-      <div className="surface-method">{props.mode === 'globe' ? visualQuality : !analysisReady ? 'Observer analysis unavailable · Camera exploration remains independent' : props.mode === 'terrain' ? `${loadingTerrain ? 'Loading regional detail…' : terrainQuality} · ${inspectionLight ? 'Inspection light (display only)' : 'Sun lighting (estimated shadows)'} · Analysis remains at the locked observer` : `${props.activeObserverId ? `Scenario ${props.activeObserverId} · ` : ''}${surfaceView ? resolvedView === 'panel' ? 'Panel viewpoint' : 'Antenna viewpoint' : 'Fixed observer'} ${surfaceHeight} m above ground · ${loadingTerrain ? 'Loading local detail…' : terrainQuality} · Earth orientation is illustrative`}</div>
+      {props.integratedControls ? <div className="scene-controls-dock" data-scene-hud="controls">
+        <div className="scene-controls-row">{bodyControls}{cornerControls}</div>
+        {methodLabel}
+        <p className="scene-controls-guidance">{props.guidanceText ?? instructions}</p>
+      </div> : <>{bodyControls}{cornerControls}{methodLabel}</>}
     </>}
   </div>;
 }
