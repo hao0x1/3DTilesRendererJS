@@ -29,6 +29,12 @@ jobs:
         with:
           python-version: '3.12'
           cache: pip
-          cache-dependency-path: moonda/scripts/data-requirements.txt
-      - run: python -m pip install -r scripts/data-requirements.txt
+          cache-dependency-path: |
+            moonda/scripts/data-requirements.txt
+            moonda/scripts/visual-requirements.txt
+      - run: python -m pip install -r scripts/visual-requirements.txt
       - run: python scripts/test-data.py
+      - run: python scripts/prepare-visual-terrain.py --verify-only
+      - run: python scripts/prepare-visuals.py --verify-only
+      - run: python scripts/prepare-scenario-terrain.py --verify-only
+      - run: python -I -S scripts/prepare-scenario-ephemeris.py --verify-only

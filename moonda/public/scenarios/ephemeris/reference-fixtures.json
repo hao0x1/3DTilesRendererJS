@@ -1,0 +1,1269 @@
+{
+  "schemaVersion": 1,
+  "frame": "MOON_ME_DE421",
+  "correction": "CN+S",
+  "radiusM": 1737400.0,
+  "description": "Independent exact SPKCPO expectations plus golden Hermite cache vectors for arbitrary nearby lunar points; azimuth north-through-east, elevation above radial local horizon.",
+  "fixtures": [
+    {
+      "id": "connecting-ridge-0",
+      "siteId": "connecting-ridge",
+      "utc": "2026-01-01T00:00:00Z",
+      "etSecondsPastJ2000TDB": 820497669.18392,
+      "mappedEtSecondsPastJ2000TDB": 820497669.18392,
+      "latitudeDeg": -89.41936933815064,
+      "longitudeDeg": -144.2488049615132,
+      "surfaceHeightM": 1689.6624124311281,
+      "observerHeightM": 0,
+      "observerPositionM": [
+        -14302.549795451165,
+        -10296.815448538204,
+        -1739000.3641663652
+      ],
+      "exactSpkcpo": {
+        "sunVectorM": [
+          124256661839.63612,
+          79219594185.7463,
+          -3461842852.891535
+        ],
+        "sunRangeM": 147402328578.69693,
+        "sunDistanceAU": 0.9853237074095396,
+        "sunAzDeg": 176.76887686240661,
+        "sunElDeg": 0.7660461882546784,
+        "earthVectorM": [
+          358568520.4344393,
+          -7993713.170726635,
+          -39481347.94046255
+        ],
+        "earthRangeM": 360824140.173568,
+        "earthDistanceAU": 0.0024119604008078174,
+        "earthAzDeg": 143.00874266137,
+        "earthElDeg": 5.818223414003012
+      },
+      "cacheInterpolatedVectorsM": {
+        "sun": [
+          124256661825.89395,
+          79219594202.82593,
+          -3461842855.8765087
+        ],
+        "earth": [
+          358568529.02640235,
+          -7993713.37325724,
+          -39481251.12634321
+        ]
+      },
+      "cacheVsExactResidual": {
+        "sun": {
+          "angularSeparationArcsec": 3.078589159472653e-05,
+          "absoluteRangeErrorM": 2.33502197265625,
+          "positionDifferenceM": 22.123986955846895
+        },
+        "earth": {
+          "angularSeparationArcsec": 0.05554897734954407,
+          "absoluteRangeErrorM": 2.0506410002708435,
+          "positionDifferenceM": 97.19483808891356
+        }
+      }
+    },
+    {
+      "id": "connecting-ridge-1",
+      "siteId": "connecting-ridge",
+      "utc": "2026-11-17T06:37:15Z",
+      "etSecondsPastJ2000TDB": 848169504.1827734,
+      "mappedEtSecondsPastJ2000TDB": 848169504.1827734,
+      "latitudeDeg": -89.52333281413006,
+      "longitudeDeg": -133.8884812862397,
+      "surfaceHeightM": 1549.1907060340106,
+      "observerHeightM": 2,
+      "observerPositionM": [
+        -10029.268106074338,
+        -10426.14599967365,
+        -1738891.0123750663
+      ],
+      "exactSpkcpo": {
+        "sunVectorM": [
+          8459349672.419626,
+          147609724509.4697,
+          -4007666988.778211
+        ],
+        "sunRangeM": 147906229623.14584,
+        "sunDistanceAU": 0.9886920778421604,
+        "sunAzDeg": 220.60108254278097,
+        "sunElDeg": 1.1907817642103284,
+        "earthVectorM": [
+          396544411.08488756,
+          -38326429.38205001,
+          4058669.968168921
+        ],
+        "earthRangeM": 398412923.92911667,
+        "earthDistanceAU": 0.002663225900641891,
+        "earthAzDeg": 128.3631593760678,
+        "earthElDeg": -0.879544718909215
+      },
+      "cacheInterpolatedVectorsM": {
+        "sun": [
+          8459349661.553476,
+          147609724509.49136,
+          -4007666991.476499
+        ],
+        "earth": [
+          396544411.4277224,
+          -38326428.16023521,
+          4058844.6431335304
+        ]
+      },
+      "cacheVsExactResidual": {
+        "sun": {
+          "angularSeparationArcsec": 1.5596507742782387e-05,
+          "absoluteRangeErrorM": 0.5267333984375,
+          "positionDifferenceM": 11.196179755428433
+        },
+        "earth": {
+          "angularSeparationArcsec": 0.09042849034944057,
+          "absoluteRangeErrorM": 2.0031597018241882,
+          "positionDifferenceM": 174.67957415927884
+        }
+      }
+    },
+    {
+      "id": "connecting-ridge-2",
+      "siteId": "connecting-ridge",
+      "utc": "2027-08-02T18:22:33Z",
+      "etSecondsPastJ2000TDB": 870503022.1832409,
+      "mappedEtSecondsPastJ2000TDB": 870503022.183241,
+      "latitudeDeg": -89.4386460195597,
+      "longitudeDeg": -137.07455599708362,
+      "surfaceHeightM": 1958.1162717044567,
+      "observerHeightM": 10,
+      "observerPositionM": [
+        -12478.215888672261,
+        -11605.804431772476,
+        -1739284.6355137806
+      ],
+      "exactSpkcpo": {
+        "sunVectorM": [
+          -151136095976.27335,
+          9985363122.044966,
+          91476393.67764443
+        ],
+        "sunRangeM": 151465624323.00934,
+        "sunDistanceAU": 1.0124851618159385,
+        "sunAzDeg": 313.2934669495285,
+        "sunElDeg": 0.35034261455666554,
+        "earthVectorM": [
+          357533128.34479725,
+          7085170.598259741,
+          4467099.231942891
+        ],
+        "earthRangeM": 357631224.1429315,
+        "earthDistanceAU": 0.00239061707542694,
+        "earthAzDeg": 138.2037877038187,
+        "earthElDeg": -1.134210456560943
+      },
+      "cacheInterpolatedVectorsM": {
+        "sun": [
+          -151136095977.90646,
+          9985363139.167223,
+          91476394.56203946
+        ],
+        "earth": [
+          357533133.13073087,
+          7085170.930903929,
+          4467112.491019346
+        ]
+      },
+      "cacheVsExactResidual": {
+        "sun": {
+          "angularSeparationArcsec": 2.315085895938477e-05,
+          "absoluteRangeErrorM": 2.7589111328125,
+          "positionDifferenceM": 17.222686220771198
+        },
+        "earth": {
+          "angularSeparationArcsec": 0.007613328592286062,
+          "absoluteRangeErrorM": 4.956827700138092,
+          "positionDifferenceM": 14.10031634900973
+        }
+      }
+    },
+    {
+      "id": "connecting-ridge-3",
+      "siteId": "connecting-ridge",
+      "utc": "2028-01-01T00:00:00Z",
+      "etSecondsPastJ2000TDB": 883569669.183905,
+      "mappedEtSecondsPastJ2000TDB": 883569669.183905,
+      "latitudeDeg": -89.53430909603256,
+      "longitudeDeg": -146.7579698565254,
+      "surfaceHeightM": 1630.7546489515819,
+      "observerHeightM": 100,
+      "observerPositionM": [
+        -11822.166853132714,
+        -7748.601105073178,
+        -1739073.3099319427
+      ],
+      "exactSpkcpo": {
+        "sunVectorM": [
+          -100554060613.76782,
+          106975369697.31778,
+          -1612343186.119452
+        ],
+        "sunRangeM": 146824549985.16064,
+        "sunDistanceAU": 0.9814614960636645,
+        "sunAzDeg": 279.98034764348427,
+        "sunElDeg": 0.7099330607212566,
+        "earthVectorM": [
+          405077286.3946916,
+          -8212910.127879157,
+          -17161897.634185325
+        ],
+        "earthRangeM": 405523847.1114391,
+        "earthDistanceAU": 0.002710759486173884,
+        "earthAzDeg": 145.60672196464006,
+        "earthElDeg": 2.0412440802898324
+      },
+      "cacheInterpolatedVectorsM": {
+        "sun": [
+          -100554060608.21344,
+          106975369699.11888,
+          -1612343189.4323788
+        ],
+        "earth": [
+          405077289.5583287,
+          -8212909.785512844,
+          -17161772.484303124
+        ]
+      },
+      "cacheVsExactResidual": {
+        "sun": {
+          "angularSeparationArcsec": 8.777939321759935e-06,
+          "absoluteRangeErrorM": 2.455322265625,
+          "positionDifferenceM": 6.713465130632065
+        },
+        "earth": {
+          "angularSeparationArcsec": 0.06366721817362332,
+          "absoluteRangeErrorM": 2.1431437730789185,
+          "positionDifferenceM": 125.19033041474692
+        }
+      }
+    },
+    {
+      "id": "connecting-ridge-4",
+      "siteId": "connecting-ridge",
+      "utc": "2026-03-03T07:00:00Z",
+      "etSecondsPastJ2000TDB": 825793269.1854128,
+      "mappedEtSecondsPastJ2000TDB": 825793269.1854128,
+      "latitudeDeg": -89.4750810585833,
+      "longitudeDeg": -137.09045650376402,
+      "surfaceHeightM": 1938.3878847120482,
+      "observerHeightM": 0,
+      "observerPositionM": [
+        -11671.144580955706,
+        -10849.120081562793,
+        -1739265.3933620986
+      ],
+      "exactSpkcpo": {
+        "sunVectorM": [
+          147534027943.7497,
+          18365970352.515144,
+          343631402.8905388
+        ],
+        "sunRangeM": 148673186388.25775,
+        "sunDistanceAU": 0.9938188671575641,
+        "sunAzDeg": 144.18464195445713,
+        "sunElDeg": -0.5580954565661614,
+        "earthVectorM": [
+          380578855.8282902,
+          31453257.305473354,
+          3019369.685680867
+        ],
+        "earthRangeM": 381888320.70645165,
+        "earthDistanceAU": 0.002552765750739069,
+        "earthAzDeg": 141.81124243829817,
+        "earthElDeg": -0.8655957860284762
+      },
+      "cacheInterpolatedVectorsM": {
+        "sun": [
+          147534027935.0006,
+          18365970371.621582,
+          343631400.06029487
+        ],
+        "earth": [
+          380578849.45859045,
+          31453256.925519638,
+          3019374.2135370504
+        ]
+      },
+      "cacheVsExactResidual": {
+        "sun": {
+          "angularSeparationArcsec": 2.8077207706693956e-05,
+          "absoluteRangeErrorM": 6.32830810546875,
+          "positionDifferenceM": 21.20407321334667
+        },
+        "earth": {
+          "angularSeparationArcsec": 0.0024739999146044605,
+          "absoluteRangeErrorM": 6.3433533906936646,
+          "positionDifferenceM": 7.824252148347963
+        }
+      }
+    },
+    {
+      "id": "connecting-ridge-5",
+      "siteId": "connecting-ridge",
+      "utc": "2026-03-03T11:30:00Z",
+      "etSecondsPastJ2000TDB": 825809469.1854156,
+      "mappedEtSecondsPastJ2000TDB": 825809469.1854155,
+      "latitudeDeg": -89.46218972999984,
+      "longitudeDeg": -137.58451345,
+      "surfaceHeightM": 1940.3706501956067,
+      "observerHeightM": 2,
+      "observerPositionM": [
+        -12053.194823807893,
+        -11012.055070028144,
+        -1739265.7466519359
+      ],
+      "exactSpkcpo": {
+        "sunVectorM": [
+          148155086466.89124,
+          12490989001.986305,
+          360458241.0224918
+        ],
+        "sunRangeM": 148681150057.44098,
+        "sunDistanceAU": 0.9938721009980324,
+        "sunAzDeg": 142.40172083298827,
+        "sunElDeg": -0.5650246505207428,
+        "earthVectorM": [
+          381279811.73939735,
+          31643452.54378623,
+          5011800.219335695
+        ],
+        "earthRangeM": 382623471.6668067,
+        "earthDistanceAU": 0.0025576799313815814,
+        "earthAzDeg": 142.32324698470697,
+        "earthElDeg": -1.1761897995495931
+      },
+      "cacheInterpolatedVectorsM": {
+        "sun": [
+          148155086456.4711,
+          12490989021.292393,
+          360458238.404126
+        ],
+        "earth": [
+          381279805.35882,
+          31643452.156840537,
+          5011797.684130531
+        ]
+      },
+      "cacheVsExactResidual": {
+        "sun": {
+          "angularSeparationArcsec": 2.8134694847170848e-05,
+          "absoluteRangeErrorM": 8.767669677734375,
+          "positionDifferenceM": 22.09434492600085
+        },
+        "earth": {
+          "angularSeparationArcsec": 0.001323654984022945,
+          "absoluteRangeErrorM": 6.423378884792328,
+          "positionDifferenceM": 6.876682281809434
+        }
+      }
+    },
+    {
+      "id": "connecting-ridge-6",
+      "siteId": "connecting-ridge",
+      "utc": "2026-03-03T16:00:00Z",
+      "etSecondsPastJ2000TDB": 825825669.1854184,
+      "mappedEtSecondsPastJ2000TDB": 825825669.1854184,
+      "latitudeDeg": -89.50817916955968,
+      "longitudeDeg": -128.10373254004995,
+      "surfaceHeightM": 1192.6976850372776,
+      "observerHeightM": 10,
+      "observerPositionM": [
+        -9209.282537659405,
+        -11743.457772193527,
+        -1738538.6451593142
+      ],
+      "exactSpkcpo": {
+        "sunVectorM": [
+          148541687975.50116,
+          6595566397.72324,
+          377141165.1185658
+        ],
+        "sunRangeM": 148688522752.01456,
+        "sunDistanceAU": 0.9939213844172353,
+        "sunAzDeg": 130.64412705840886,
+        "sunElDeg": -0.465687529891367,
+        "earthVectorM": [
+          381987336.74966156,
+          31773053.806670055,
+          6997734.306896357
+        ],
+        "earthRangeM": 383370344.0157191,
+        "earthDistanceAU": 0.0025626724646670997,
+        "earthAzDeg": 132.8509169848207,
+        "earthElDeg": -1.3803982892296205
+      },
+      "cacheInterpolatedVectorsM": {
+        "sun": [
+          148541687968.28766,
+          6595566412.993563,
+          377141162.7094763
+        ],
+        "earth": [
+          381987330.3649397,
+          31773053.382586833,
+          6997724.745979161
+        ]
+      },
+      "cacheVsExactResidual": {
+        "sun": {
+          "angularSeparationArcsec": 2.1859873140276937e-05,
+          "absoluteRangeErrorM": 6.535125732421875,
+          "positionDifferenceM": 17.059339582519485
+        },
+        "earth": {
+          "angularSeparationArcsec": 0.005080696365859943,
+          "absoluteRangeErrorM": 6.571353495121002,
+          "positionDifferenceM": 11.504592892781478
+        }
+      }
+    },
+    {
+      "id": "shackleton-rim-0",
+      "siteId": "shackleton-rim",
+      "utc": "2026-01-01T00:00:00Z",
+      "etSecondsPastJ2000TDB": 820497669.18392,
+      "mappedEtSecondsPastJ2000TDB": 820497669.18392,
+      "latitudeDeg": -89.75404541701737,
+      "longitudeDeg": -170.19022228067305,
+      "surfaceHeightM": 941.3567566113256,
+      "observerHeightM": 0,
+      "observerPositionM": [
+        -7353.079246499676,
+        -1271.3896296317616,
+        -1738325.3402066082
+      ],
+      "exactSpkcpo": {
+        "sunVectorM": [
+          124256654881.69206,
+          79219585172.85513,
+          -3461843528.0190706
+        ],
+        "sunRangeM": 147402317885.30215,
+        "sunDistanceAU": 0.9853236359286105,
+        "sunAzDeg": 202.707646952279,
+        "sunElDeg": 1.11886586117518,
+        "earthVectorM": [
+          358561570.5653475,
+          -8002738.027388604,
+          -39482022.84289355
+        ],
+        "earthRangeM": 360817507.6544796,
+        "earthDistanceAU": 0.0024119160651561306,
+        "earthAzDeg": 168.91675500494597,
+        "earthElDeg": 6.040736075976277
+      },
+      "cacheInterpolatedVectorsM": {
+        "sun": [
+          124256654876.4234,
+          79219585177.40012,
+          -3461843530.9004683
+        ],
+        "earth": [
+          358561579.5558534,
+          -8002738.799076147,
+          -39481926.15030297
+        ]
+      },
+      "cacheVsExactResidual": {
+        "sun": {
+          "angularSeparationArcsec": 1.0186252198768627e-05,
+          "absoluteRangeErrorM": 1.931060791015625,
+          "positionDifferenceM": 7.531143106438116
+        },
+        "earth": {
+          "angularSeparationArcsec": 0.05550761527634455,
+          "absoluteRangeErrorM": 1.6290473937988281,
+          "positionDifferenceM": 97.11272713482356
+        }
+      }
+    },
+    {
+      "id": "shackleton-rim-1",
+      "siteId": "shackleton-rim",
+      "utc": "2026-11-17T06:37:15Z",
+      "etSecondsPastJ2000TDB": 848169504.1827734,
+      "mappedEtSecondsPastJ2000TDB": 848169504.1827734,
+      "latitudeDeg": -89.86104733571663,
+      "longitudeDeg": -141.51439514875642,
+      "surfaceHeightM": 1457.8885027495182,
+      "observerHeightM": 2,
+      "observerPositionM": [
+        -3300.954590749515,
+        -2624.344031264162,
+        -1738854.77494844
+      ],
+      "exactSpkcpo": {
+        "sunVectorM": [
+          8459342932.595739,
+          147609716708.9639,
+          -4007667024.817951
+        ],
+        "sunRangeM": 147906221453.77673,
+        "sunDistanceAU": 0.9886920232333009,
+        "sunAzDeg": 228.2317021759903,
+        "sunElDeg": 1.4601198001551503,
+        "earthVectorM": [
+          396537683.4673216,
+          -38334230.361728825,
+          4058633.7326262146
+        ],
+        "earthRangeM": 398406978.0197523,
+        "earthDistanceAU": 0.002663186154692724,
+        "earthAzDeg": 135.99156831801469,
+        "earthElDeg": -0.6836319955818286
+      },
+      "cacheInterpolatedVectorsM": {
+        "sun": [
+          8459342933.239961,
+          147609716707.6894,
+          -4007667027.7139254
+        ],
+        "earth": [
+          396537683.114207,
+          -38334229.962203614,
+          4058808.4057069044
+        ]
+      },
+      "cacheVsExactResidual": {
+        "sun": {
+          "angularSeparationArcsec": 4.2041543672757445e-06,
+          "absoluteRangeErrorM": 1.156646728515625,
+          "positionDifferenceM": 3.2289397617734203
+        },
+        "earth": {
+          "angularSeparationArcsec": 0.0904299845936491,
+          "absoluteRangeErrorM": 1.3895605206489563,
+          "positionDifferenceM": 174.6738945232515
+        }
+      }
+    },
+    {
+      "id": "shackleton-rim-2",
+      "siteId": "shackleton-rim",
+      "utc": "2027-08-02T18:22:33Z",
+      "etSecondsPastJ2000TDB": 870503022.1832409,
+      "mappedEtSecondsPastJ2000TDB": 870503022.183241,
+      "latitudeDeg": -89.7787749491249,
+      "longitudeDeg": -152.9959643046871,
+      "surfaceHeightM": 1700.5403635207513,
+      "observerHeightM": 10,
+      "observerPositionM": [
+        -5982.780586170428,
+        -3048.9097939406774,
+        -1739097.5769315027
+      ],
+      "exactSpkcpo": {
+        "sunVectorM": [
+          -151136102471.99097,
+          9985354573.707342,
+          91476206.6192925
+        ],
+        "sunRangeM": 151465630240.9335,
+        "sunDistanceAU": 1.012485201374818,
+        "sunAzDeg": 329.2158850253715,
+        "sunElDeg": 0.1554517893695836,
+        "earthVectorM": [
+          357526633.7502533,
+          7076613.831431267,
+          4466912.187941387
+        ],
+        "earthRangeM": 357624559.57134956,
+        "earthDistanceAU": 0.002390572525517568,
+        "earthAzDeg": 154.12851237905912,
+        "earthElDeg": -0.914725946756743
+      },
+      "cacheInterpolatedVectorsM": {
+        "sun": [
+          -151136102473.34177,
+          9985354582.272585,
+          91476207.50345719
+        ],
+        "earth": [
+          357526637.6954284,
+          7076614.036266097,
+          4466925.432437068
+        ]
+      },
+      "cacheVsExactResidual": {
+        "sun": {
+          "angularSeparationArcsec": 1.1580044279809602e-05,
+          "absoluteRangeErrorM": 1.913055419921875,
+          "positionDifferenceM": 8.716065070712888
+        },
+        "earth": {
+          "angularSeparationArcsec": 0.007610252219561796,
+          "absoluteRangeErrorM": 4.113578736782074,
+          "positionDifferenceM": 13.821108107829732
+        }
+      }
+    },
+    {
+      "id": "shackleton-rim-3",
+      "siteId": "shackleton-rim",
+      "utc": "2028-01-01T00:00:00Z",
+      "etSecondsPastJ2000TDB": 883569669.183905,
+      "mappedEtSecondsPastJ2000TDB": 883569669.183905,
+      "latitudeDeg": -89.8592547063174,
+      "longitudeDeg": -186.1259529028842,
+      "surfaceHeightM": 47.402686772308336,
+      "observerHeightM": 100,
+      "observerPositionM": [
+        -4243.853839440354,
+        455.48150010609004,
+        -1737542.160301367
+      ],
+      "exactSpkcpo": {
+        "sunVectorM": [
+          -100554068193.65189,
+          106975361493.26602,
+          -1612344717.1226814
+        ],
+        "sunRangeM": 146824549215.70633,
+        "sunDistanceAU": 0.9814614909201801,
+        "sunAzDeg": 319.35260275363555,
+        "sunElDeg": 0.7359916635767135,
+        "earthVectorM": [
+          405069709.1962012,
+          -8221113.5793366665,
+          -17163428.701459516
+        ],
+        "earthRangeM": 405516509.28361654,
+        "earthDistanceAU": 0.0027107104358245157,
+        "earthAzDeg": 184.96276212578263,
+        "earthElDeg": 2.2855427470824057
+      },
+      "cacheInterpolatedVectorsM": {
+        "sun": [
+          -100554068186.52646,
+          106975361495.03627,
+          -1612344720.5820093
+        ],
+        "earth": [
+          405069711.245315,
+          -8221113.8681180235,
+          -17163303.633933697
+        ]
+      },
+      "cacheVsExactResidual": {
+        "sun": {
+          "angularSeparationArcsec": 1.0251925218747588e-05,
+          "absoluteRangeErrorM": 3.5521240234375,
+          "positionDifferenceM": 8.116183995782244
+        },
+        "earth": {
+          "angularSeparationArcsec": 0.06360258781082663,
+          "absoluteRangeErrorM": 3.240735411643982,
+          "positionDifferenceM": 125.08464444747388
+        }
+      }
+    },
+    {
+      "id": "shackleton-rim-4",
+      "siteId": "shackleton-rim",
+      "utc": "2026-03-03T07:00:00Z",
+      "etSecondsPastJ2000TDB": 825793269.1854128,
+      "mappedEtSecondsPastJ2000TDB": 825793269.1854128,
+      "latitudeDeg": -89.81520825271326,
+      "longitudeDeg": -152.88652361353587,
+      "surfaceHeightM": 1667.9830092323605,
+      "observerHeightM": 0,
+      "observerPositionM": [
+        -4992.4910549915785,
+        -2556.2686933888926,
+        -1739058.9380613968
+      ],
+      "exactSpkcpo": {
+        "sunVectorM": [
+          147534021262.99094,
+          18365962070.3676,
+          343631196.47107834
+        ],
+        "sunRangeM": 148673178735.09677,
+        "sunDistanceAU": 0.9938188159993427,
+        "sunAzDeg": 159.98231515051788,
+        "sunElDeg": -0.306057038678097,
+        "earthVectorM": [
+          380572176.39315647,
+          31444964.45773245,
+          3019163.227737692
+        ],
+        "earthRangeM": 381880979.6009322,
+        "earthDistanceAU": 0.00255271667847965,
+        "earthAzDeg": 157.60922501280652,
+        "earthElDeg": -0.6238472233169511
+      },
+      "cacheInterpolatedVectorsM": {
+        "sun": [
+          147534021256.34708,
+          18365962078.77019,
+          343631193.6049942
+        ],
+        "earth": [
+          380572170.8050645,
+          31444964.074131463,
+          3019167.7582363486
+        ]
+      },
+      "cacheVsExactResidual": {
+        "sun": {
+          "angularSeparationArcsec": 1.3309188427093587e-05,
+          "absoluteRangeErrorM": 5.56158447265625,
+          "positionDifferenceM": 11.088681601183225
+        },
+        "earth": {
+          "angularSeparationArcsec": 0.0024712493820662393,
+          "absoluteRangeErrorM": 5.564708411693573,
+          "positionDifferenceM": 7.204119630678598
+        }
+      }
+    },
+    {
+      "id": "shackleton-rim-5",
+      "siteId": "shackleton-rim",
+      "utc": "2026-03-03T11:30:00Z",
+      "etSecondsPastJ2000TDB": 825809469.1854156,
+      "mappedEtSecondsPastJ2000TDB": 825809469.1854155,
+      "latitudeDeg": -89.80235284999999,
+      "longitudeDeg": -154.29004622,
+      "surfaceHeightM": 1703.3072836515753,
+      "observerHeightM": 2,
+      "observerPositionM": [
+        -5405.284269525269,
+        -2602.544277825299,
+        -1739094.9598821255
+      ],
+      "exactSpkcpo": {
+        "sunVectorM": [
+          148155079817.2977,
+          12490980602.796324,
+          360458070.27283496
+        ],
+        "sunRangeM": 148681142725.3292,
+        "sunDistanceAU": 0.9938720519858922,
+        "sunAzDeg": 159.10898183352808,
+        "sunElDeg": -0.3235603937075601,
+        "earthVectorM": [
+          381273163.00792474,
+          31635043.006861474,
+          5011629.425106599
+        ],
+        "earthRangeM": 382616148.6471894,
+        "earthDistanceAU": 0.0025576309800189514,
+        "earthAzDeg": 159.03209368885447,
+        "earthElDeg": -0.9350598387820368
+      },
+      "cacheInterpolatedVectorsM": {
+        "sun": [
+          148155079808.56055,
+          12490980611.781599,
+          360458067.6173562
+        ],
+        "earth": [
+          381273157.44826573,
+          31635042.646048333,
+          5011626.89736072
+        ]
+      },
+      "cacheVsExactResidual": {
+        "sun": {
+          "angularSeparationArcsec": 1.392819916294529e-05,
+          "absoluteRangeErrorM": 7.957794189453125,
+          "positionDifferenceM": 12.811111036539597
+        },
+        "earth": {
+          "angularSeparationArcsec": 0.0013243341498221635,
+          "absoluteRangeErrorM": 5.603086173534393,
+          "positionDifferenceM": 6.117964824663906
+        }
+      }
+    },
+    {
+      "id": "shackleton-rim-6",
+      "siteId": "shackleton-rim",
+      "utc": "2026-03-03T16:00:00Z",
+      "etSecondsPastJ2000TDB": 825825669.1854184,
+      "mappedEtSecondsPastJ2000TDB": 825825669.1854184,
+      "latitudeDeg": -89.83395694242418,
+      "longitudeDeg": -125.08825035948772,
+      "surfaceHeightM": 971.1423740606174,
+      "observerHeightM": 10,
+      "observerPositionM": [
+        -2895.9265809725634,
+        -4122.283423322621,
+        -1738373.8425753994
+      ],
+      "exactSpkcpo": {
+        "sunVectorM": [
+          148541681660.9673,
+          6595558785.957379,
+          377141000.35126877
+        ],
+        "sunRangeM": 148688516105.65393,
+        "sunDistanceAU": 0.9939213399890586,
+        "sunAzDeg": 127.6301820039481,
+        "sunElDeg": -0.24670825584569991,
+        "earthVectorM": [
+          381981022.62777895,
+          31765432.576431166,
+          6997569.493285566
+        ],
+        "earthRangeM": 383363418.0948216,
+        "earthDistanceAU": 0.0025626261677454583,
+        "earthAzDeg": 129.83956693950626,
+        "earthElDeg": -1.152260086049989
+      },
+      "cacheInterpolatedVectorsM": {
+        "sun": [
+          148541681654.9317,
+          6595558791.819214,
+          377140997.90689236
+        ],
+        "earth": [
+          381981017.008983,
+          31765432.20823796,
+          6997559.943395246
+        ]
+      },
+      "cacheVsExactResidual": {
+        "sun": {
+          "angularSeparationArcsec": 9.139339044356284e-06,
+          "absoluteRangeErrorM": 5.775787353515625,
+          "positionDifferenceM": 8.761526589492876
+        },
+        "earth": {
+          "angularSeparationArcsec": 0.005082351985026533,
+          "absoluteRangeErrorM": 5.803358197212219,
+          "positionDifferenceM": 11.086335691972407
+        }
+      }
+    },
+    {
+      "id": "shackleton-peak-0",
+      "siteId": "shackleton-peak",
+      "utc": "2026-01-01T00:00:00Z",
+      "etSecondsPastJ2000TDB": 820497669.18392,
+      "mappedEtSecondsPastJ2000TDB": 820497669.18392,
+      "latitudeDeg": -88.76843707192714,
+      "longitudeDeg": 120.57105933423838,
+      "surfaceHeightM": 949.9902505486529,
+      "observerHeightM": 0,
+      "observerPositionM": [
+        -19002.893182974327,
+        32169.211655164734,
+        -1737948.4228469625
+      ],
+      "exactSpkcpo": {
+        "sunVectorM": [
+          124256666522.3009,
+          79219551739.98018,
+          -3461843905.9276953
+        ],
+        "sunRangeM": 147402309738.846,
+        "sunDistanceAU": 0.9853235814729147,
+        "sunAzDeg": 271.91903105225,
+        "sunElDeg": 1.387312775592366,
+        "earthVectorM": [
+          358573216.83665055,
+          -8036176.76924328,
+          -39482399.4326706
+        ],
+        "earthRangeM": 360829865.4970388,
+        "earthDistanceAU": 0.0024119986722313607,
+        "earthAzDeg": 238.0359866291426,
+        "earthElDeg": 5.6309491265557226
+      },
+      "cacheInterpolatedVectorsM": {
+        "sun": [
+          124256666526.23735,
+          79219551736.79883,
+          -3461843907.817828
+        ],
+        "earth": [
+          358573229.3697899,
+          -8036179.400360944,
+          -39482303.06766261
+        ]
+      },
+      "cacheVsExactResidual": {
+        "sun": {
+          "angularSeparationArcsec": 7.19765590251066e-06,
+          "absoluteRangeErrorM": 1.6529541015625,
+          "positionDifferenceM": 5.402704030050553
+        },
+        "earth": {
+          "angularSeparationArcsec": 0.055559003228650934,
+          "absoluteRangeErrorM": 1.9690033197402954,
+          "positionDifferenceM": 97.21222724954134
+        }
+      }
+    },
+    {
+      "id": "shackleton-peak-1",
+      "siteId": "shackleton-peak",
+      "utc": "2026-11-17T06:37:15Z",
+      "etSecondsPastJ2000TDB": 848169504.1827734,
+      "mappedEtSecondsPastJ2000TDB": 848169504.1827734,
+      "latitudeDeg": -88.87089527261183,
+      "longitudeDeg": 125.26719460861473,
+      "surfaceHeightM": 1400.6934862287496,
+      "observerHeightM": 2,
+      "observerPositionM": [
+        -19783.504502263007,
+        27975.19506375485,
+        -1738465.0724951935
+      ],
+      "exactSpkcpo": {
+        "sunVectorM": [
+          8459359373.28383,
+          147609686109.97354,
+          -4007667415.14796
+        ],
+        "sunRangeM": 147906191867.01318,
+        "sunDistanceAU": 0.9886918254580022,
+        "sunAzDeg": 321.428324868513,
+        "sunElDeg": 2.435605202816144,
+        "earthVectorM": [
+          396554164.41618615,
+          -38364826.96397093,
+          4058244.0782381743
+        ],
+        "earthRangeM": 398426322.6856298,
+        "earthDistanceAU": 0.002663315465797133,
+        "earthAzDeg": 229.22110703741384,
+        "earthElDeg": -1.3211918180596212
+      },
+      "cacheInterpolatedVectorsM": {
+        "sun": [
+          8459359415.789872,
+          147609686108.1503,
+          -4007667417.416379
+        ],
+        "earth": [
+          396554165.6641185,
+          -38364829.501298636,
+          4058418.7032536576
+        ]
+      },
+      "cacheVsExactResidual": {
+        "sun": {
+          "angularSeparationArcsec": 5.940881009451432e-05,
+          "absoluteRangeErrorM": 0.6729736328125,
+          "positionDifferenceM": 42.60555812599541
+        },
+        "earth": {
+          "angularSeparationArcsec": 0.09039919931378157,
+          "absoluteRangeErrorM": 3.265103280544281,
+          "positionDifferenceM": 174.64790694315255
+        }
+      }
+    },
+    {
+      "id": "shackleton-peak-2",
+      "siteId": "shackleton-peak",
+      "utc": "2027-08-02T18:22:33Z",
+      "etSecondsPastJ2000TDB": 870503022.1832409,
+      "mappedEtSecondsPastJ2000TDB": 870503022.183241,
+      "latitudeDeg": -88.78564717639021,
+      "longitudeDeg": 123.9434173251475,
+      "surfaceHeightM": 1602.7358163447034,
+      "observerHeightM": 10,
+      "observerPositionM": [
+        -20578.68507764163,
+        30574.24188491287,
+        -1738622.163894469
+      ],
+      "exactSpkcpo": {
+        "sunVectorM": [
+          -151136087880.74426,
+          9985320926.68593,
+          91475731.15577549
+        ],
+        "sunRangeM": 151465613462.97168,
+        "sunDistanceAU": 1.0124850892210706,
+        "sunAzDeg": 52.282283219814836,
+        "sunElDeg": 0.7083683436368725,
+        "earthVectorM": [
+          357541232.7325146,
+          7042990.901342498,
+          4466436.813591456
+        ],
+        "earthRangeM": 357638484.90134895,
+        "earthDistanceAU": 0.002390665610599155,
+        "earthAzDeg": 237.20368243454098,
+        "earthElDeg": -1.3735104049835418
+      },
+      "cacheInterpolatedVectorsM": {
+        "sun": [
+          -151136087877.43726,
+          9985320959.120907,
+          91475732.09042016
+        ],
+        "earth": [
+          357541233.59991986,
+          7042990.884587243,
+          4466450.019400034
+        ]
+      },
+      "cacheVsExactResidual": {
+        "sun": {
+          "angularSeparationArcsec": 4.4388805385390306e-05,
+          "absoluteRangeErrorM": 1.16094970703125,
+          "positionDifferenceM": 32.61652281391349
+        },
+        "earth": {
+          "angularSeparationArcsec": 0.007609519228575944,
+          "absoluteRangeErrorM": 1.0317628979682922,
+          "positionDifferenceM": 13.234275680291061
+        }
+      }
+    },
+    {
+      "id": "shackleton-peak-3",
+      "siteId": "shackleton-peak",
+      "utc": "2028-01-01T00:00:00Z",
+      "etSecondsPastJ2000TDB": 883569669.183905,
+      "mappedEtSecondsPastJ2000TDB": 883569669.183905,
+      "latitudeDeg": -88.88478051760927,
+      "longitudeDeg": 119.89036076248132,
+      "surfaceHeightM": 1295.9075009653916,
+      "observerHeightM": 100,
+      "observerPositionM": [
+        -16864.99807347062,
+        29340.55209259801,
+        -1738466.5403121766
+      ],
+      "exactSpkcpo": {
+        "sunVectorM": [
+          -100554055603.5824,
+          106975332580.4252,
+          -1612343792.5257235
+        ],
+        "sunRangeM": 146824519517.43695,
+        "sunDistanceAU": 0.9814612923995111,
+        "sunAzDeg": 13.342648812518457,
+        "sunElDeg": 1.7143328885567717,
+        "earthVectorM": [
+          405082331.3627563,
+          -8249996.698783663,
+          -17162504.46959662
+        ],
+        "earthRangeM": 405529664.990719,
+        "earthDistanceAU": 0.0027107983762947973,
+        "earthAzDeg": 238.90724621912352,
+        "earthElDeg": 1.8499074769959631
+      },
+      "cacheInterpolatedVectorsM": {
+        "sun": [
+          -100554055565.38222,
+          106975332609.96568,
+          -1612343796.2019985
+        ],
+        "earth": [
+          405082332.389549,
+          -8249998.938710515,
+          -17162379.253922887
+        ]
+      },
+      "cacheVsExactResidual": {
+        "sun": {
+          "angularSeparationArcsec": 6.77281668881737e-05,
+          "absoluteRangeErrorM": 4.598358154296875,
+          "positionDifferenceM": 48.429420865356526
+        },
+        "earth": {
+          "angularSeparationArcsec": 0.0636645464983882,
+          "absoluteRangeErrorM": 4.2280303835868835,
+          "positionDifferenceM": 125.23991585791542
+        }
+      }
+    },
+    {
+      "id": "shackleton-peak-4",
+      "siteId": "shackleton-peak",
+      "utc": "2026-03-03T07:00:00Z",
+      "etSecondsPastJ2000TDB": 825793269.1854128,
+      "mappedEtSecondsPastJ2000TDB": 825793269.1854128,
+      "latitudeDeg": -88.82208107756553,
+      "longitudeDeg": 123.927847989853,
+      "surfaceHeightM": 1603.5054661485826,
+      "observerHeightM": 0,
+      "observerPositionM": [
+        -19953.191114881516,
+        29662.32805092274,
+        -1738636.019551673
+      ],
+      "exactSpkcpo": {
+        "sunVectorM": [
+          147534036222.13165,
+          18365929835.937447,
+          343630773.59359527
+        ],
+        "sunRangeM": 148673189596.64648,
+        "sunDistanceAU": 0.9938188886043181,
+        "sunAzDeg": 243.1754789937957,
+        "sunElDeg": -0.6640578291394832,
+        "earthVectorM": [
+          380587133.618223,
+          31412745.578106407,
+          3018740.278874051
+        ],
+        "earthRangeM": 381893230.6985308,
+        "earthDistanceAU": 0.0025527985720088914,
+        "earthAzDeg": 240.80379831760297,
+        "earthElDeg": -1.0276345930349566
+      },
+      "cacheInterpolatedVectorsM": {
+        "sun": [
+          147534036217.04712,
+          18365929860.173447,
+          343630770.68648446
+        ],
+        "earth": [
+          380587131.5051244,
+          31412745.477387153,
+          3018744.8397266245
+        ]
+      },
+      "cacheVsExactResidual": {
+        "sun": {
+          "angularSeparationArcsec": 3.4474149216124315e-05,
+          "absoluteRangeErrorM": 2.058380126953125,
+          "positionDifferenceM": 24.933661485646013
+        },
+        "earth": {
+          "angularSeparationArcsec": 0.002472635201326492,
+          "absoluteRangeErrorM": 2.078104317188263,
+          "positionDifferenceM": 5.027594489519508
+        }
+      }
+    },
+    {
+      "id": "shackleton-peak-5",
+      "siteId": "shackleton-peak",
+      "utc": "2026-03-03T11:30:00Z",
+      "etSecondsPastJ2000TDB": 825809469.1854156,
+      "mappedEtSecondsPastJ2000TDB": 825809469.1854155,
+      "latitudeDeg": -88.80917892999994,
+      "longitudeDeg": 123.70766992,
+      "surfaceHeightM": 1648.2096255770118,
+      "observerHeightM": 2,
+      "observerPositionM": [
+        -20056.868198128428,
+        30065.28545748659,
+        -1738674.6194291806
+      ],
+      "exactSpkcpo": {
+        "sunVectorM": [
+          148155094466.81635,
+          12490947917.808008,
+          360457649.97449887
+        ],
+        "sunRangeM": 148681154576.07294,
+        "sunDistanceAU": 0.9938721312032213,
+        "sunAzDeg": 241.11929949415355,
+        "sunElDeg": -0.7141442775802384,
+        "earthVectorM": [
+          381287811.1325291,
+          31602374.757518373,
+          5011209.034750609
+        ],
+        "earthRangeM": 382628040.3009426,
+        "earthDistanceAU": 0.002557710470814493,
+        "earthAzDeg": 241.0492528074161,
+        "earthElDeg": -1.3270273985558652
+      },
+      "cacheInterpolatedVectorsM": {
+        "sun": [
+          148155094460.14447,
+          12490947943.951864,
+          360457647.2769032
+        ],
+        "earth": [
+          381287809.0321944,
+          31602374.81631302,
+          5011206.556907775
+        ]
+      },
+      "cacheVsExactResidual": {
+        "sun": {
+          "angularSeparationArcsec": 3.710633870712781e-05,
+          "absoluteRangeErrorM": 4.458404541015625,
+          "positionDifferenceM": 27.116270898254697
+        },
+        "earth": {
+          "angularSeparationArcsec": 0.0013267939306722753,
+          "absoluteRangeErrorM": 2.1205736994743347,
+          "positionDifferenceM": 3.2487794305424336
+        }
+      }
+    },
+    {
+      "id": "shackleton-peak-6",
+      "siteId": "shackleton-peak",
+      "utc": "2026-03-03T16:00:00Z",
+      "etSecondsPastJ2000TDB": 825825669.1854184,
+      "mappedEtSecondsPastJ2000TDB": 825825669.1854184,
+      "latitudeDeg": -88.85900676920562,
+      "longitudeDeg": 127.77934626086329,
+      "surfaceHeightM": 1417.0499544852835,
+      "observerHeightM": 10,
+      "observerPositionM": [
+        -21211.961776981203,
+        27366.660646517983,
+        -1738482.2772223041
+      ],
+      "exactSpkcpo": {
+        "sunVectorM": [
+          148541699974.73367,
+          6595527272.78536,
+          377141108.8151615
+        ],
+        "sunRangeM": 148688533003.74515,
+        "sunDistanceAU": 0.9939214529458216,
+        "sunAzDeg": 234.7707408087711,
+        "sunElDeg": -0.8035867645263102,
+        "earthVectorM": [
+          381999335.3797202,
+          31733943.07341344,
+          6997677.862082543
+        ],
+        "earthRangeM": 383379058.9860068,
+        "earthDistanceAU": 0.0025627307206452558,
+        "earthAzDeg": 236.99215815117685,
+        "earthElDeg": -1.6676210707881929
+      },
+      "cacheInterpolatedVectorsM": {
+        "sun": [
+          148541699970.96692,
+          6595527302.875144,
+          377141106.34153926
+        ],
+        "earth": [
+          381999333.044179,
+          31733943.26416812,
+          6997668.37804215
+        ]
+      },
+      "cacheVsExactResidual": {
+        "sun": {
+          "angularSeparationArcsec": 4.207154914584723e-05,
+          "absoluteRangeErrorM": 2.434600830078125,
+          "positionDifferenceM": 30.425356614921174
+        },
+        "earth": {
+          "angularSeparationArcsec": 0.005083220198113903,
+          "absoluteRangeErrorM": 2.484454929828644,
+          "positionDifferenceM": 9.769245731405944
+        }
+      }
+    }
+  ]
+}

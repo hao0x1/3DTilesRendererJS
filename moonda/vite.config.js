@@ -27,5 +27,5 @@ export default defineConfig({
       if (/\/node_modules\/(react|react-dom|scheduler)\//.test(id)) return 'react';
     } } },
   },
-  test: { include: ['src/**/*.test.ts'] },
+  test: { include: ['src/**/*.test.{ts,tsx}'] },
 });

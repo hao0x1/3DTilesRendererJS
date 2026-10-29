@@ -1,0 +1,4 @@
+# Generation only. --verify-only requires only Python's standard library.
+numpy==2.3.5
+spiceypy==6.0.0
+rasterio==1.5.2

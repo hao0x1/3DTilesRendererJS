@@ -1,0 +1,2 @@
+# Preserve the downloaded font license byte for byte, including its CRLF endings.
+moonda/public/visuals/fonts/OFL-IBM-Plex.txt -text -whitespace

@@ -1,0 +1,340 @@
+{
+  "version": 2,
+  "generatedAt": "2026-10-29T01:14:37.027588+00:00",
+  "moon": {
+    "referenceRadiusMeters": 1737400,
+    "orientation": {
+      "projection": "equirectangular",
+      "centerLongitudeDegrees": 0,
+      "rowOrder": "north-to-south",
+      "longitudeRangeDegrees": [
+        -180,
+        180
+      ],
+      "latitudeRangeDegrees": [
+        90,
+        -90
+      ],
+      "pixelRegistration": "pixel-center"
+    },
+    "color": {
+      "fallback": {
+        "url": "/visuals/moon-color-2k.jpg",
+        "bytes": 457942,
+        "sha256": "f7130a1822681fa7512d7dcfd40db8c10b9ba4f06777910348698260ed7a2170",
+        "sourceUrl": "https://svs.gsfc.nasa.gov/vis/a000000/a004700/a004720/lroc_color_2k.jpg",
+        "sourcePage": "https://svs.gsfc.nasa.gov/4720/",
+        "sourceFilename": "moon-color-2025-2k.jpg",
+        "sourceSha256": "f7130a1822681fa7512d7dcfd40db8c10b9ba4f06777910348698260ed7a2170",
+        "credit": "NASA's Scientific Visualization Studio / Ernie Wright / LRO-LROC",
+        "usageGuidelinesUrl": "https://www.nasa.gov/nasa-brand-center/images-and-media/",
+        "width": 2048,
+        "height": 1024,
+        "colorSpace": "srgb",
+        "mode": "RGB",
+        "imageFormat": "JPEG",
+        "mipmapPolicy": "Generate GPU mipmaps; trilinear minification; choose anisotropy from renderer capabilities. JPEG/WebP files do not contain a stored mip chain."
+      },
+      "high": {
+        "url": "/visuals/moon-color-8k.webp",
+        "bytes": 7841330,
+        "sha256": "fe9f52483349d7a0a85dd43a5e3e6e16fbf183821ddb57d1f50ddda434af610f",
+        "sourceUrl": "https://svs.gsfc.nasa.gov/vis/a000000/a004700/a004720/lroc_color_16bit_srgb_8k.tif",
+        "sourcePage": "https://svs.gsfc.nasa.gov/4720/",
+        "sourceFilename": "lroc-color-2025-8k.tif",
+        "sourceSha256": "db7808e878b6a55eb409bb231eab8deb477f84b5c9d7396d76ff73e5d54992d9",
+        "credit": "NASA's Scientific Visualization Studio / Ernie Wright / LRO-LROC",
+        "usageGuidelinesUrl": "https://www.nasa.gov/nasa-brand-center/images-and-media/",
+        "width": 8192,
+        "height": 4096,
+        "colorSpace": "srgb",
+        "mode": "RGB",
+        "jpegUrl": "/visuals/moon-color-8k.jpg",
+        "lossyDisplayDerivative": true,
+        "scientificUse": "visualization only; use georeferenced source DEMs for terrain analysis",
+        "mipmapPolicy": "Generate GPU mipmaps; trilinear minification; choose anisotropy from renderer capabilities. JPEG/WebP files do not contain a stored mip chain.",
+        "imageFormat": "WEBP",
+        "jpeg": {
+          "url": "/visuals/moon-color-8k.jpg",
+          "width": 8192,
+          "height": 4096,
+          "bytes": 13509251,
+          "sha256": "e9fad49583d234c3863e5091e0cb8cff2b51864993e1d4ec4cf7d47bc16a2b13"
+        }
+      },
+      "ultra": {
+        "url": "/visuals/moon-color-16k.jpg",
+        "bytes": 45446448,
+        "sha256": "a22464968d843c1b28166f9be41e8faafb470f3eec68409f7b926a85bf418ac7",
+        "sourceUrl": "https://svs.gsfc.nasa.gov/vis/a000000/a004700/a004720/lroc_color_16bit_srgb_16k.tif",
+        "sourcePage": "https://svs.gsfc.nasa.gov/4720/",
+        "sourceFilename": "lroc-color-2025-16k.tif",
+        "sourceSha256": "b98fdc430a210018dbeb0da708af186b8e55bfe70d0275f1e901d92837999746",
+        "credit": "NASA's Scientific Visualization Studio / Ernie Wright / LRO-LROC",
+        "usageGuidelinesUrl": "https://www.nasa.gov/nasa-brand-center/images-and-media/",
+        "width": 16384,
+        "height": 8192,
+        "colorSpace": "srgb",
+        "mode": "RGB",
+        "imageFormat": "JPEG",
+        "jpegUrl": "/visuals/moon-color-16k.jpg",
+        "jpeg": {
+          "url": "/visuals/moon-color-16k.jpg",
+          "width": 16384,
+          "height": 8192,
+          "bytes": 45446448,
+          "sha256": "a22464968d843c1b28166f9be41e8faafb470f3eec68409f7b926a85bf418ac7"
+        },
+        "lossyDisplayDerivative": true,
+        "scientificUse": "visualization only; use georeferenced source DEMs for terrain analysis",
+        "mipmapPolicy": "Generate GPU mipmaps; trilinear minification; choose anisotropy from renderer capabilities. JPEG/WebP files do not contain a stored mip chain."
+      }
+    },
+    "height": {
+      "url": "/visuals/moon-height-5760x2880.u16",
+      "bytes": 33177600,
+      "sha256": "45a979b1dbe37c47c35f21c62d0d6aca34f4879e8f8151d36df1fc7c6876d2fc",
+      "sourceUrl": "https://svs.gsfc.nasa.gov/vis/a000000/a004700/a004720/ldem_16.tif",
+      "sourcePage": "https://svs.gsfc.nasa.gov/4720/",
+      "sourceFilename": "ldem-16-float.tif",
+      "sourceSha256": "1ea42bf44f7e9d694f79c3afa7145f97fbf06cc67372067d9fe73dce43bad796",
+      "credit": "NASA's Scientific Visualization Studio / LRO-LOLA",
+      "usageGuidelinesUrl": "https://www.nasa.gov/nasa-brand-center/images-and-media/",
+      "width": 5760,
+      "height": 2880,
+      "format": "uint16-le",
+      "units": "meters",
+      "scale": 0.5,
+      "bias": -10000,
+      "referenceRadiusMeters": 1737400,
+      "noData": null,
+      "allFinite": true,
+      "minMeters": -8981.5009765625,
+      "maxMeters": 10685.5,
+      "maximumQuantizationErrorMeters": 0.0009765625,
+      "png16Url": "/visuals/moon-height-5760x2880-16bit.png",
+      "projection": "equirectangular",
+      "centerLongitudeDegrees": 0,
+      "rowOrder": "north-to-south",
+      "longitudeRangeDegrees": [
+        -180,
+        180
+      ],
+      "latitudeRangeDegrees": [
+        90,
+        -90
+      ],
+      "pixelRegistration": "pixel-center",
+      "png16": {
+        "url": "/visuals/moon-height-5760x2880-16bit.png",
+        "width": 5760,
+        "height": 2880,
+        "bytes": 23015990,
+        "sha256": "37b3a7f19157298e21a3a0cb982827f20bf71fbbfe4f79565da95b9dbdc19a81",
+        "bitDepth": 16
+      }
+    },
+    "normal": {
+      "url": "/visuals/moon-normal-5760x2880.webp",
+      "bytes": 17728510,
+      "sha256": "1607b3e4c2cd3215832d5ff93a64e93a12592e1dfd50ee6a6e1c2a76007b4f81",
+      "sourceUrl": "https://svs.gsfc.nasa.gov/vis/a000000/a004700/a004720/ldem_16.tif",
+      "sourcePage": "https://svs.gsfc.nasa.gov/4720/",
+      "sourceFilename": "ldem-16-float.tif",
+      "sourceSha256": "1ea42bf44f7e9d694f79c3afa7145f97fbf06cc67372067d9fe73dce43bad796",
+      "credit": "Derived by MOONDA from NASA LRO-LOLA elevation data",
+      "usageGuidelinesUrl": "https://www.nasa.gov/nasa-brand-center/images-and-media/",
+      "width": 5760,
+      "height": 2880,
+      "normalSpace": "tangent",
+      "colorSpace": "linear",
+      "scaleFactor": 1,
+      "method": "metric central longitude and finite latitude gradients at source resolution; no vertical exaggeration",
+      "tangentAxes": {
+        "x": "east/increasing-U",
+        "y": "north/increasing-V",
+        "z": "radial up"
+      },
+      "projection": "equirectangular",
+      "centerLongitudeDegrees": 0,
+      "rowOrder": "north-to-south",
+      "longitudeRangeDegrees": [
+        -180,
+        180
+      ],
+      "latitudeRangeDegrees": [
+        90,
+        -90
+      ],
+      "pixelRegistration": "pixel-center",
+      "referenceGeometry": "undeformed sphere; total physical terrain gradient, not a residual detail map",
+      "applicationNote": "Use linear/NoColorSpace. Do not double-count coarse terrain slopes when normals are already computed from displaced geometry."
+    }
+  },
+  "earth": {
+    "referenceRadiusMeters": 6371000,
+    "orientation": {
+      "projection": "equirectangular",
+      "centerLongitudeDegrees": 0,
+      "rowOrder": "north-to-south",
+      "longitudeRangeDegrees": [
+        -180,
+        180
+      ],
+      "latitudeRangeDegrees": [
+        90,
+        -90
+      ],
+      "pixelRegistration": "pixel-center"
+    },
+    "color": {
+      "fallback": {
+        "url": "/visuals/earth-color-2k.png",
+        "bytes": 1511379,
+        "sha256": "ae6214b078ed0864c96f74bcb10ae3021f6eb116f8059797efe0fa9ea8b89d35",
+        "sourceUrl": "https://svs.gsfc.nasa.gov/vis/a000000/a002900/a002915/bluemarble-2048.png",
+        "sourcePage": "https://svs.gsfc.nasa.gov/2915/",
+        "sourceFilename": "earth-blue-marble-2k.png",
+        "sourceSha256": "ae6214b078ed0864c96f74bcb10ae3021f6eb116f8059797efe0fa9ea8b89d35",
+        "credit": "NASA/Goddard Space Flight Center Scientific Visualization Studio / Reto St\u00f6ckli",
+        "usageGuidelinesUrl": "https://www.nasa.gov/nasa-brand-center/images-and-media/",
+        "width": 2048,
+        "height": 1024,
+        "colorSpace": "srgb",
+        "mode": "RGB",
+        "imageFormat": "PNG",
+        "mipmapPolicy": "Generate GPU mipmaps; trilinear minification; choose anisotropy from renderer capabilities. JPEG/WebP files do not contain a stored mip chain."
+      },
+      "high": {
+        "url": "/visuals/earth-color-4k.webp",
+        "bytes": 1048202,
+        "sha256": "f45d02ab82e46aa492cc58968e6c8ff9217b8f3fd518307321f8b740b912deaf",
+        "sourceUrl": "https://assets.science.nasa.gov/content/dam/science/esd/eo/images/bmng/bmng-base/july/world.200407.3x21600x10800.jpg",
+        "sourcePage": "https://science.nasa.gov/earth/earth-observatory/blue-marble-next-generation/base-map/",
+        "sourceFilename": "earth-bmng-july-2004-21600.jpg",
+        "sourceSha256": "dea8b4dc8a4f93f5f8bce0c8c85a508a178e7901e9ed8e6bf86e6ce7ef6d61e2",
+        "credit": "NASA Earth Observatory / Reto St\u00f6ckli",
+        "usageGuidelinesUrl": "https://www.nasa.gov/nasa-brand-center/images-and-media/",
+        "width": 4096,
+        "height": 2048,
+        "colorSpace": "srgb",
+        "mode": "RGB",
+        "jpegUrl": "/visuals/earth-color-4k.jpg",
+        "lossyDisplayDerivative": true,
+        "scientificUse": "visualization only; use georeferenced source DEMs for terrain analysis",
+        "mipmapPolicy": "Generate GPU mipmaps; trilinear minification; choose anisotropy from renderer capabilities. JPEG/WebP files do not contain a stored mip chain.",
+        "imageFormat": "WEBP",
+        "jpeg": {
+          "url": "/visuals/earth-color-4k.jpg",
+          "width": 4096,
+          "height": 2048,
+          "bytes": 2047103,
+          "sha256": "293b87d3c69a927828cd32886053ee8fe1b0086a0005838ac5d647ac17bd5bb0"
+        }
+      },
+      "ultra": {
+        "url": "/visuals/earth-color-8k.webp",
+        "bytes": 3787782,
+        "sha256": "d46daf5955233ffc2a8aec7f12006156bd0b0f1b68f4fb12ce5d96f2124ac298",
+        "sourceUrl": "https://assets.science.nasa.gov/content/dam/science/esd/eo/images/bmng/bmng-base/july/world.200407.3x21600x10800.jpg",
+        "sourcePage": "https://science.nasa.gov/earth/earth-observatory/blue-marble-next-generation/base-map/",
+        "sourceFilename": "earth-bmng-july-2004-21600.jpg",
+        "sourceSha256": "dea8b4dc8a4f93f5f8bce0c8c85a508a178e7901e9ed8e6bf86e6ce7ef6d61e2",
+        "credit": "NASA Earth Observatory / Reto St\u00f6ckli",
+        "usageGuidelinesUrl": "https://www.nasa.gov/nasa-brand-center/images-and-media/",
+        "width": 8192,
+        "height": 4096,
+        "colorSpace": "srgb",
+        "mode": "RGB",
+        "jpegUrl": "/visuals/earth-color-8k.jpg",
+        "lossyDisplayDerivative": true,
+        "scientificUse": "visualization only; use georeferenced source DEMs for terrain analysis",
+        "mipmapPolicy": "Generate GPU mipmaps; trilinear minification; choose anisotropy from renderer capabilities. JPEG/WebP files do not contain a stored mip chain.",
+        "imageFormat": "WEBP",
+        "jpeg": {
+          "url": "/visuals/earth-color-8k.jpg",
+          "width": 8192,
+          "height": 4096,
+          "bytes": 7227899,
+          "sha256": "60194c367fb6e2f2a97075d311b45e60bfcbbad5ccbd0c8501ff18aa1c660b25"
+        }
+      }
+    }
+  },
+  "usageGuidelinesUrl": "https://www.nasa.gov/nasa-brand-center/images-and-media/",
+  "reuseNote": "NASA imagery/data reuse follows item credits and NASA media guidelines. This is distinct from the application code license; NASA has not endorsed this application.",
+  "fontsManifestUrl": "/visuals/fonts/fonts.json",
+  "fonts": {
+    "license": "OFL-1.1",
+    "licenseUrl": "/visuals/fonts/OFL-IBM-Plex.txt",
+    "fonts": [
+      {
+        "family": "IBM Plex Sans",
+        "weight": 400,
+        "style": "normal",
+        "url": "/visuals/fonts/IBMPlexSans-Regular.woff2",
+        "bytes": 63020,
+        "sha256": "ba711a3085ff9f27440b6b9c4550cfc47c97bf36591d5da958b975bb3add8c1a",
+        "sourceUrl": "https://raw.githubusercontent.com/IBM/plex/master/packages/plex-sans/fonts/complete/woff2/IBMPlexSans-Regular.woff2",
+        "credit": "IBM Corp.; Reserved Font Name Plex",
+        "license": "OFL-1.1"
+      },
+      {
+        "family": "IBM Plex Sans",
+        "weight": 500,
+        "style": "normal",
+        "url": "/visuals/fonts/IBMPlexSans-Medium.woff2",
+        "bytes": 66740,
+        "sha256": "5660f8a658f8bb50dbc005232f885eadffd2bc1c235c4f6fbb63469d1f9cde6d",
+        "sourceUrl": "https://raw.githubusercontent.com/IBM/plex/master/packages/plex-sans/fonts/complete/woff2/IBMPlexSans-Medium.woff2",
+        "credit": "IBM Corp.; Reserved Font Name Plex",
+        "license": "OFL-1.1"
+      },
+      {
+        "family": "IBM Plex Sans",
+        "weight": 600,
+        "style": "normal",
+        "url": "/visuals/fonts/IBMPlexSans-SemiBold.woff2",
+        "bytes": 67060,
+        "sha256": "f78048030eab62e860efa39a0df79e2e5581bf122eb95b9bc42c0b8a4988d205",
+        "sourceUrl": "https://raw.githubusercontent.com/IBM/plex/master/packages/plex-sans/fonts/complete/woff2/IBMPlexSans-SemiBold.woff2",
+        "credit": "IBM Corp.; Reserved Font Name Plex",
+        "license": "OFL-1.1"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "weight": 400,
+        "style": "normal",
+        "url": "/visuals/fonts/IBMPlexMono-Regular.woff2",
+        "bytes": 49248,
+        "sha256": "ba204497f16b6d334cee9d1e963a831b73e3a56e1d6300a8489d18df7214b350",
+        "sourceUrl": "https://raw.githubusercontent.com/IBM/plex/master/packages/plex-mono/fonts/complete/woff2/IBMPlexMono-Regular.woff2",
+        "credit": "IBM Corp.; Reserved Font Name Plex",
+        "license": "OFL-1.1"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "weight": 500,
+        "style": "normal",
+        "url": "/visuals/fonts/IBMPlexMono-Medium.woff2",
+        "bytes": 50400,
+        "sha256": "33faf307fa6031fb4062276d7320a6d632de890cbb347576fd80cfa01077bc25",
+        "sourceUrl": "https://raw.githubusercontent.com/IBM/plex/master/packages/plex-mono/fonts/complete/woff2/IBMPlexMono-Medium.woff2",
+        "credit": "IBM Corp.; Reserved Font Name Plex",
+        "license": "OFL-1.1"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "weight": 600,
+        "style": "normal",
+        "url": "/visuals/fonts/IBMPlexMono-SemiBold.woff2",
+        "bytes": 50600,
+        "sha256": "6a825b4824c01cbb401e829e5a066a1818411bcb3538b5a5792c5ca9b82343c3",
+        "sourceUrl": "https://raw.githubusercontent.com/IBM/plex/master/packages/plex-mono/fonts/complete/woff2/IBMPlexMono-SemiBold.woff2",
+        "credit": "IBM Corp.; Reserved Font Name Plex",
+        "license": "OFL-1.1"
+      }
+    ],
+    "totalBytes": 351524
+  }
+}

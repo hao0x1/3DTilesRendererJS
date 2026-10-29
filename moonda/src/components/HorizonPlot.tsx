@@ -3,9 +3,10 @@ import { GlobeHemisphereWest, Sun } from '@phosphor-icons/react';
 import type { Site, SkySample } from '../types';
 
 interface Props {
-  site: Site;
-  sample: SkySample;
+  site: Site | null;
+  sample: SkySample | null;
   terrainEnabled: boolean;
+  unavailableMessage?: string;
 }
 
 const compass = [
@@ -17,7 +18,7 @@ const compass = [
 ];
 const signed = (value: number) => `${value < 0 ? '−' : '+'}${Math.abs(value).toFixed(2)}°`;
 
-export default function HorizonPlot({ site, sample, terrainEnabled }: Props) {
+export default function HorizonPlot({ site, sample, terrainEnabled, unavailableMessage = 'Updating observer horizon…' }: Props) {
   const host = useRef<HTMLDivElement>(null);
   const [width, setWidth] = useState(760);
   const titleId = useId();
@@ -29,6 +30,11 @@ export default function HorizonPlot({ site, sample, terrainEnabled }: Props) {
     observer.observe(host.current);
     return () => observer.disconnect();
   }, []);
+
+  const heading = <div className="horizon-panel-heading"><span className="eyebrow">THE VIEW FROM HERE</span><h2>Your local skyline.</h2><p>{terrainEnabled ? 'The terrain profile shows what can block the Sun or Earth at each direction.' : 'The geometric horizon provides a smooth reference without terrain obstruction.'}</p><div className="horizon-legend"><span className="solar"><Sun size={15} />Sun centre</span><span className="earth"><GlobeHemisphereWest size={15} />Earth centre</span></div></div>;
+  if (!site || !sample) return <section className="horizon-panel" aria-label="Terrain horizon and current Sun and Earth positions">
+    {heading}<div className="horizon-plot" ref={host}><svg viewBox={`0 0 ${width} 180`} role="img" aria-label={unavailableMessage}><text x={width / 2} y="88" textAnchor="middle" className="horizon-axis-label">{unavailableMessage}</text></svg></div>
+  </section>;
 
   const terrain = site.horizon.elevationDeg;
   const hasProfile = terrain.length > 0 && terrain.every(Number.isFinite);
@@ -58,7 +64,7 @@ export default function HorizonPlot({ site, sample, terrainEnabled }: Props) {
   const ticks = [maxY, 0, minY];
 
   return <section className="horizon-panel" aria-label="Terrain horizon and current Sun and Earth positions">
-    <div className="horizon-panel-heading"><span className="eyebrow">THE VIEW FROM HERE</span><h2>Your local skyline.</h2><p>{terrainEnabled ? 'The terrain profile shows what can block the Sun or Earth at each direction.' : 'The geometric horizon provides a smooth reference without terrain obstruction.'}</p><div className="horizon-legend"><span className="solar"><Sun size={15} />Sun centre</span><span className="earth"><GlobeHemisphereWest size={15} />Earth centre</span></div></div>
+    {heading}
     <div className="horizon-plot" ref={host}>
       {terrainEnabled && !hasProfile ? <p className="horizon-unavailable">The terrain horizon profile is unavailable for this site.</p> : <svg viewBox={`0 0 ${width} ${height}`} role="img" aria-labelledby={`${titleId} ${descriptionId}`}>
         <title id={titleId}>Current Sun and Earth elevations against the {terrainEnabled ? 'terrain' : 'geometric'} horizon at {site.name}</title>
