@@ -1,0 +1,880 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-10-29T05:09:08.851Z",
+  "manifestSha256": "b566937932d4ba7af0c208305f0d341b1883ceb11feb54b8315422b081f729b8",
+  "datasetId": "moonda-scenarios-6fae3fb411a74ccc8f46",
+  "purpose": "Numerical convergence at selected native-data scenarios, not physical accuracy, terrain uncertainty, or flight qualification.",
+  "legacy": {
+    "cadenceMinutes": 5,
+    "maxEnergyStepMinutes": 5,
+    "solarDiscRays": 256
+  },
+  "production": {
+    "cadenceMinutes": 5,
+    "maxEnergyStepMinutes": 1,
+    "solarDiscRays": 512
+  },
+  "reference": {
+    "cadenceMinutes": 0.5,
+    "maxEnergyStepMinutes": 0.5,
+    "solarDiscRays": 4096
+  },
+  "referenceCheck": {
+    "cadenceMinutes": 0.25,
+    "maxEnergyStepMinutes": 0.25,
+    "solarDiscRays": 8192
+  },
+  "acceptance": "Production generated energy, minimum battery and unmet load within 1% of nonzero reference, or 0.01 Wh for zero reference. Legacy settings remain reported for comparison. Two sensitive cases also compare the reference with 15-second/8192-ray quadrature.",
+  "limitations": [
+    "Both runs share the same 0.25-degree finite-bearing terrain model and hourly SPICE cache; this does not validate their physical errors.",
+    "Reference uses 30-second component ephemerides, 30-second midpoint quadrature and 4096 projected solar-disc rays. It is a finer numerical comparison, not an exact solution.",
+    "Production 1-minute/512-ray power quadrature retains the prepared 5-minute component geometry axis; it does not introduce new NASA observations.",
+    "Timing is a single Node.js run on this development machine, excluding native terrain preparation; it is not a browser performance guarantee.",
+    "The March case intentionally uses a low initial battery charge to exercise unmet-load accounting.",
+    "Sun-centre horizon clearance excludes Earth eclipse; per-ray electrical generation includes opaque-Earth eclipse."
+  ],
+  "cases": [
+    {
+      "id": "default-A",
+      "regionId": "connecting-ridge",
+      "startUtc": "2026-11-04T00:00:00Z",
+      "durationHours": 48,
+      "mode": "sun-tracking",
+      "point": {
+        "regionId": "connecting-ridge",
+        "eastM": 0,
+        "northM": 0,
+        "panelHeightM": 2,
+        "antennaHeightM": 2
+      },
+      "equipment": {
+        "panel": {
+          "areaM2": 2,
+          "efficiency": 0.28,
+          "deratingFactor": 0.8,
+          "mode": "sun-tracking",
+          "tiltDeg": 80,
+          "azimuthDeg": 0
+        },
+        "battery": {
+          "capacityWh": 2000,
+          "initialChargeWh": 1000,
+          "reserveWh": 200,
+          "chargeEfficiency": 0.9,
+          "dischargeEfficiency": 0.9
+        },
+        "loadW": 100
+      },
+      "sourceModel": "scenario-v1-b566937932d4",
+      "sourceUtcStart": "2026-11-04T00:00:00Z",
+      "sourceUtcEnd": "2026-11-06T00:00:00.000Z",
+      "sunCentreHorizonPercent": 0,
+      "legacy": {
+        "generatedWh": 907.9624034589557,
+        "minBatteryWh": 0,
+        "unmetLoadWh": 3308.727250040642,
+        "endingBatteryWh": 285.0206881496373,
+        "spilledWh": 0,
+        "conservationResidualWh": -8.100187187665142e-13
+      },
+      "production": {
+        "generatedWh": 913.6779119139266,
+        "minBatteryWh": 0,
+        "unmetLoadWh": 3301.889727863459,
+        "endingBatteryWh": 284.0108757996694,
+        "spilledWh": 0,
+        "conservationResidualWh": -1.1525003174028825e-11
+      },
+      "reference": {
+        "generatedWh": 909.1009012480428,
+        "minBatteryWh": 0,
+        "unmetLoadWh": 3304.852427642817,
+        "endingBatteryWh": 282.557996001728,
+        "spilledWh": 0,
+        "conservationResidualWh": 4.250466645316919e-11
+      },
+      "legacyDelta": {
+        "generatedWh": -1.1384977890870687,
+        "generatedRelativePercent": 0.12523338031280165,
+        "minBatteryWh": 0,
+        "minBatteryRelativePercent": null,
+        "minBatteryPercentCapacity": 0,
+        "unmetLoadWh": 3.874822397825028,
+        "unmetLoadRelativePercent": 0.11724645752454192,
+        "unmetLoadPercentDemand": 0.08072546662135476
+      },
+      "delta": {
+        "generatedWh": 4.57701066588379,
+        "generatedRelativePercent": 0.5034656394686579,
+        "minBatteryWh": 0,
+        "minBatteryRelativePercent": null,
+        "minBatteryPercentCapacity": 0,
+        "unmetLoadWh": -2.9626997793579903,
+        "unmetLoadRelativePercent": 0.08964696137646101,
+        "unmetLoadPercentDemand": 0.061722912069958134
+      },
+      "eclipseCheck": null,
+      "timingMs": {
+        "legacy": 130.51858300000004,
+        "production": 154.8397500000001,
+        "reference": 2184.725125
+      },
+      "referenceConvergence": {
+        "reference": {
+          "generatedWh": 908.9741577119946,
+          "minBatteryWh": 0,
+          "unmetLoadWh": 3304.73384095481,
+          "endingBatteryWh": 282.33719880019265,
+          "spilledWh": 0,
+          "conservationResidualWh": -4.411049303598702e-11
+        },
+        "delta": {
+          "generatedWh": 0.1267435360481386,
+          "generatedRelativePercent": 0.013943579690666723,
+          "minBatteryWh": 0,
+          "minBatteryRelativePercent": null,
+          "minBatteryPercentCapacity": 0,
+          "unmetLoadWh": 0.11858668800687155,
+          "unmetLoadRelativePercent": 0.0035883884667882743,
+          "unmetLoadPercentDemand": 0.0024705560001431572
+        }
+      }
+    },
+    {
+      "id": "default-B-plus72h",
+      "regionId": "connecting-ridge",
+      "startUtc": "2026-11-07T00:00:00Z",
+      "durationHours": 48,
+      "mode": "sun-tracking",
+      "point": {
+        "regionId": "connecting-ridge",
+        "eastM": 0,
+        "northM": 0,
+        "panelHeightM": 2,
+        "antennaHeightM": 2
+      },
+      "equipment": {
+        "panel": {
+          "areaM2": 2,
+          "efficiency": 0.28,
+          "deratingFactor": 0.8,
+          "mode": "sun-tracking",
+          "tiltDeg": 80,
+          "azimuthDeg": 0
+        },
+        "battery": {
+          "capacityWh": 2000,
+          "initialChargeWh": 1000,
+          "reserveWh": 200,
+          "chargeEfficiency": 0.9,
+          "dischargeEfficiency": 0.9
+        },
+        "loadW": 100
+      },
+      "sourceModel": "scenario-v1-b566937932d4",
+      "sourceUtcStart": "2026-11-07T00:00:00Z",
+      "sourceUtcEnd": "2026-11-09T00:00:00.000Z",
+      "sunCentreHorizonPercent": 100,
+      "legacy": {
+        "generatedWh": 29955.450558661214,
+        "minBatteryWh": 1000,
+        "unmetLoadWh": 0,
+        "endingBatteryWh": 2000,
+        "spilledWh": 24044.339447550108,
+        "conservationResidualWh": -8.824940778140444e-12
+      },
+      "production": {
+        "generatedWh": 29955.4505586756,
+        "minBatteryWh": 1000,
+        "unmetLoadWh": 0,
+        "endingBatteryWh": 2000,
+        "spilledWh": 24044.33944756439,
+        "conservationResidualWh": 1.1866063687193673e-10
+      },
+      "reference": {
+        "generatedWh": 29955.45056505615,
+        "minBatteryWh": 1000,
+        "unmetLoadWh": 0,
+        "endingBatteryWh": 2000,
+        "spilledWh": 24044.339453945115,
+        "conservationResidualWh": -1.1424106105550891e-10
+      },
+      "legacyDelta": {
+        "generatedWh": -0.0000063949373725336045,
+        "generatedRelativePercent": 2.1348159523240397e-8,
+        "minBatteryWh": 0,
+        "minBatteryRelativePercent": 0,
+        "minBatteryPercentCapacity": 0,
+        "unmetLoadWh": 0,
+        "unmetLoadRelativePercent": null,
+        "unmetLoadPercentDemand": 0
+      },
+      "delta": {
+        "generatedWh": -0.000006380552804330364,
+        "generatedRelativePercent": 2.1300139653961515e-8,
+        "minBatteryWh": 0,
+        "minBatteryRelativePercent": 0,
+        "minBatteryPercentCapacity": 0,
+        "unmetLoadWh": 0,
+        "unmetLoadRelativePercent": null,
+        "unmetLoadPercentDemand": 0
+      },
+      "eclipseCheck": null,
+      "timingMs": {
+        "legacy": 34.5924159999995,
+        "production": 152.7221249999984,
+        "reference": 2355.711042000001
+      },
+      "referenceConvergence": null
+    },
+    {
+      "id": "sunrise-Nov5",
+      "regionId": "connecting-ridge",
+      "startUtc": "2026-11-05T00:00:00Z",
+      "durationHours": 48,
+      "mode": "sun-tracking",
+      "point": {
+        "regionId": "connecting-ridge",
+        "eastM": 0,
+        "northM": 0,
+        "panelHeightM": 2,
+        "antennaHeightM": 2
+      },
+      "equipment": {
+        "panel": {
+          "areaM2": 2,
+          "efficiency": 0.28,
+          "deratingFactor": 0.8,
+          "mode": "sun-tracking",
+          "tiltDeg": 80,
+          "azimuthDeg": 0
+        },
+        "battery": {
+          "capacityWh": 2000,
+          "initialChargeWh": 1000,
+          "reserveWh": 200,
+          "chargeEfficiency": 0.9,
+          "dischargeEfficiency": 0.9
+        },
+        "loadW": 100
+      },
+      "sourceModel": "scenario-v1-b566937932d4",
+      "sourceUtcStart": "2026-11-05T00:00:00Z",
+      "sourceUtcEnd": "2026-11-07T00:00:00.000Z",
+      "sunCentreHorizonPercent": 49.70314178240728,
+      "legacy": {
+        "generatedWh": 14514.825058194338,
+        "minBatteryWh": 0,
+        "unmetLoadWh": 908.7272500406397,
+        "endingBatteryWh": 2000,
+        "spilledWh": 9301.33008601276,
+        "conservationResidualWh": -3.234390533179976e-11
+      },
+      "production": {
+        "generatedWh": 14512.489680529447,
+        "minBatteryWh": 0,
+        "unmetLoadWh": 901.8897278634819,
+        "endingBatteryWh": 2000,
+        "spilledWh": 9292.157186170673,
+        "conservationResidualWh": 1.6693491033947794e-10
+      },
+      "reference": {
+        "generatedWh": 14507.40976103897,
+        "minBatteryWh": 0,
+        "unmetLoadWh": 904.8524276427901,
+        "endingBatteryWh": 2000,
+        "spilledWh": 9290.039966459512,
+        "conservationResidualWh": -2.406039811830851e-10
+      },
+      "legacyDelta": {
+        "generatedWh": 7.415297155366716,
+        "generatedRelativePercent": 0.05111386027904996,
+        "minBatteryWh": 0,
+        "minBatteryRelativePercent": null,
+        "minBatteryPercentCapacity": 0,
+        "unmetLoadWh": 3.8748223978495844,
+        "unmetLoadRelativePercent": 0.42822699917419615,
+        "unmetLoadPercentDemand": 0.08072546662186635
+      },
+      "delta": {
+        "generatedWh": 5.079919490475731,
+        "generatedRelativePercent": 0.03501603369692044,
+        "minBatteryWh": 0,
+        "minBatteryRelativePercent": null,
+        "minBatteryPercentCapacity": 0,
+        "unmetLoadWh": -2.9626997793081955,
+        "unmetLoadRelativePercent": 0.3274235321472536,
+        "unmetLoadPercentDemand": 0.06172291206892074
+      },
+      "eclipseCheck": null,
+      "timingMs": {
+        "legacy": 34.30895899999996,
+        "production": 150.19124999999985,
+        "reference": 2141.751333000002
+      },
+      "referenceConvergence": null
+    },
+    {
+      "id": "sunrise-Nov6",
+      "regionId": "connecting-ridge",
+      "startUtc": "2026-11-06T00:00:00Z",
+      "durationHours": 48,
+      "mode": "sun-tracking",
+      "point": {
+        "regionId": "connecting-ridge",
+        "eastM": 0,
+        "northM": 0,
+        "panelHeightM": 2,
+        "antennaHeightM": 2
+      },
+      "equipment": {
+        "panel": {
+          "areaM2": 2,
+          "efficiency": 0.28,
+          "deratingFactor": 0.8,
+          "mode": "sun-tracking",
+          "tiltDeg": 80,
+          "azimuthDeg": 0
+        },
+        "battery": {
+          "capacityWh": 2000,
+          "initialChargeWh": 1000,
+          "reserveWh": 200,
+          "chargeEfficiency": 0.9,
+          "dischargeEfficiency": 0.9
+        },
+        "loadW": 100
+      },
+      "sourceModel": "scenario-v1-b566937932d4",
+      "sourceUtcStart": "2026-11-06T00:00:00Z",
+      "sourceUtcEnd": "2026-11-08T00:00:00.000Z",
+      "sunCentreHorizonPercent": 99.7031417824079,
+      "legacy": {
+        "generatedWh": 28578.57100659564,
+        "minBatteryWh": 1000,
+        "unmetLoadWh": 0,
+        "endingBatteryWh": 2000,
+        "spilledWh": 22667.459895484542,
+        "conservationResidualWh": -1.6058265828178264e-11
+      },
+      "production": {
+        "generatedWh": 28570.520120484853,
+        "minBatteryWh": 1000,
+        "unmetLoadWh": 0,
+        "endingBatteryWh": 2000,
+        "spilledWh": 22659.409009373638,
+        "conservationResidualWh": 1.2572343166539213e-10
+      },
+      "reference": {
+        "generatedWh": 28570.017214794334,
+        "minBatteryWh": 1000,
+        "unmetLoadWh": 0,
+        "endingBatteryWh": 2000,
+        "spilledWh": 22658.906103683352,
+        "conservationResidualWh": -1.688249540165998e-10
+      },
+      "legacyDelta": {
+        "generatedWh": 8.553791801306943,
+        "generatedRelativePercent": 0.029939750252854436,
+        "minBatteryWh": 0,
+        "minBatteryRelativePercent": 0,
+        "minBatteryPercentCapacity": 0,
+        "unmetLoadWh": 0,
+        "unmetLoadRelativePercent": null,
+        "unmetLoadPercentDemand": 0
+      },
+      "delta": {
+        "generatedWh": 0.5029056905186735,
+        "generatedRelativePercent": 0.0017602568690727118,
+        "minBatteryWh": 0,
+        "minBatteryRelativePercent": 0,
+        "minBatteryPercentCapacity": 0,
+        "unmetLoadWh": 0,
+        "unmetLoadRelativePercent": null,
+        "unmetLoadPercentDemand": 0
+      },
+      "eclipseCheck": null,
+      "timingMs": {
+        "legacy": 33.56312500000058,
+        "production": 146.17520799999693,
+        "reference": 2164.530042000002
+      },
+      "referenceConvergence": null
+    },
+    {
+      "id": "sunrise-Nov5-fixed",
+      "regionId": "connecting-ridge",
+      "startUtc": "2026-11-05T00:00:00Z",
+      "durationHours": 48,
+      "mode": "fixed",
+      "azimuthDeg": 90,
+      "point": {
+        "regionId": "connecting-ridge",
+        "eastM": 0,
+        "northM": 0,
+        "panelHeightM": 2,
+        "antennaHeightM": 2
+      },
+      "equipment": {
+        "panel": {
+          "areaM2": 2,
+          "efficiency": 0.28,
+          "deratingFactor": 0.8,
+          "mode": "fixed",
+          "tiltDeg": 80,
+          "azimuthDeg": 90
+        },
+        "battery": {
+          "capacityWh": 2000,
+          "initialChargeWh": 1000,
+          "reserveWh": 200,
+          "chargeEfficiency": 0.9,
+          "dischargeEfficiency": 0.9
+        },
+        "loadW": 100
+      },
+      "sourceModel": "scenario-v1-b566937932d4",
+      "sourceUtcStart": "2026-11-05T00:00:00Z",
+      "sourceUtcEnd": "2026-11-07T00:00:00.000Z",
+      "sunCentreHorizonPercent": 49.70314178240728,
+      "legacy": {
+        "generatedWh": 86.78077668509596,
+        "minBatteryWh": 0,
+        "unmetLoadWh": 3813.219223314934,
+        "endingBatteryWh": 0,
+        "spilledWh": 0,
+        "conservationResidualWh": -2.4726887204451486e-12
+      },
+      "production": {
+        "generatedWh": 87.18570802648004,
+        "minBatteryWh": 0,
+        "unmetLoadWh": 3812.814291973364,
+        "endingBatteryWh": 0,
+        "spilledWh": 0,
+        "conservationResidualWh": 2.8848035071860068e-12
+      },
+      "reference": {
+        "generatedWh": 86.78722664992296,
+        "minBatteryWh": 0,
+        "unmetLoadWh": 3813.2127733504076,
+        "endingBatteryWh": 0,
+        "spilledWh": 0,
+        "conservationResidualWh": 1.0416556506243069e-11
+      },
+      "legacyDelta": {
+        "generatedWh": -0.0064499648269986665,
+        "generatedRelativePercent": 0.007431928724967953,
+        "minBatteryWh": 0,
+        "minBatteryRelativePercent": null,
+        "minBatteryPercentCapacity": 0,
+        "unmetLoadWh": 0.006449964526382246,
+        "unmetLoadRelativePercent": 0.00016914777406231926,
+        "unmetLoadPercentDemand": 0.0001343742609662968
+      },
+      "delta": {
+        "generatedWh": 0.39848137655708626,
+        "generatedRelativePercent": 0.4591474943247769,
+        "minBatteryWh": 0,
+        "minBatteryRelativePercent": null,
+        "minBatteryPercentCapacity": 0,
+        "unmetLoadWh": -0.3984813770434812,
+        "unmetLoadRelativePercent": 0.010450016842185364,
+        "unmetLoadPercentDemand": 0.008301695355072525
+      },
+      "eclipseCheck": null,
+      "timingMs": {
+        "legacy": 37.82279099999869,
+        "production": 150.30958399999872,
+        "reference": 2192.9607499999984
+      },
+      "referenceConvergence": null
+    },
+    {
+      "id": "March3-eclipse",
+      "regionId": "shackleton-peak",
+      "startUtc": "2026-03-03T10:00:00Z",
+      "durationHours": 3,
+      "mode": "sun-tracking",
+      "initialChargeWh": 50,
+      "point": {
+        "regionId": "shackleton-peak",
+        "eastM": 0,
+        "northM": 0,
+        "panelHeightM": 2,
+        "antennaHeightM": 2
+      },
+      "equipment": {
+        "panel": {
+          "areaM2": 2,
+          "efficiency": 0.28,
+          "deratingFactor": 0.8,
+          "mode": "sun-tracking",
+          "tiltDeg": 80,
+          "azimuthDeg": 0
+        },
+        "battery": {
+          "capacityWh": 2000,
+          "initialChargeWh": 50,
+          "reserveWh": 200,
+          "chargeEfficiency": 0.9,
+          "dischargeEfficiency": 0.9
+        },
+        "loadW": 100
+      },
+      "sourceModel": "scenario-v1-b566937932d4",
+      "sourceUtcStart": "2026-03-03T10:00:00Z",
+      "sourceUtcEnd": "2026-03-03T13:00:00.000Z",
+      "sunCentreHorizonPercent": 100,
+      "legacy": {
+        "generatedWh": 270.0558692427206,
+        "minBatteryWh": 0,
+        "unmetLoadWh": 63.760527852455276,
+        "endingBatteryWh": 58.79956606974311,
+        "spilledWh": 0,
+        "conservationResidualWh": 5.329070518200751e-15
+      },
+      "production": {
+        "generatedWh": 269.9955214374748,
+        "minBatteryWh": 0,
+        "unmetLoadWh": 64.02969293520418,
+        "endingBatteryWh": 59.23451381748718,
+        "spilledWh": 0,
+        "conservationResidualWh": 4.156675004196586e-13
+      },
+      "reference": {
+        "generatedWh": 269.415321368735,
+        "minBatteryWh": 0,
+        "unmetLoadWh": 64.57918039323545,
+        "endingBatteryWh": 59.23338344061033,
+        "spilledWh": 0,
+        "conservationResidualWh": -8.988365607365267e-13
+      },
+      "legacyDelta": {
+        "generatedWh": 0.6405478739855539,
+        "generatedRelativePercent": 0.23775480575169988,
+        "minBatteryWh": 0,
+        "minBatteryRelativePercent": null,
+        "minBatteryPercentCapacity": 0,
+        "unmetLoadWh": -0.818652540780171,
+        "unmetLoadRelativePercent": 1.2676725467793695,
+        "unmetLoadPercentDemand": 0.272884180260057
+      },
+      "delta": {
+        "generatedWh": 0.5802000687397708,
+        "generatedRelativePercent": 0.21535526108616537,
+        "minBatteryWh": 0,
+        "minBatteryRelativePercent": null,
+        "minBatteryPercentCapacity": 0,
+        "unmetLoadWh": -0.5494874580312654,
+        "unmetLoadRelativePercent": 0.8508740041067837,
+        "unmetLoadPercentDemand": 0.18316248601042182
+      },
+      "eclipseCheck": {
+        "utc": "2026-03-03T11:30:00.000Z",
+        "sunCentreHorizonClearanceDeg": 1.2621598674845802,
+        "visibleDiscFraction": 0,
+        "terrainOnlyVisibleDiscFraction": 1
+      },
+      "timingMs": {
+        "legacy": 3.7995840000003227,
+        "production": 11.67162499999904,
+        "reference": 143.5245840000025
+      },
+      "referenceConvergence": {
+        "reference": {
+          "generatedWh": 269.43164890311795,
+          "minBatteryWh": 0,
+          "unmetLoadWh": 64.54405991485395,
+          "endingBatteryWh": 59.21303931992256,
+          "spilledWh": 0,
+          "conservationResidualWh": 1.5916157281026244e-12
+        },
+        "delta": {
+          "generatedWh": -0.016327534382924114,
+          "generatedRelativePercent": 0.006059991262865766,
+          "minBatteryWh": 0,
+          "minBatteryRelativePercent": null,
+          "minBatteryPercentCapacity": 0,
+          "unmetLoadWh": 0.035120478381500675,
+          "unmetLoadRelativePercent": 0.05441318446318895,
+          "unmetLoadPercentDemand": 0.011706826127166892
+        }
+      }
+    },
+    {
+      "id": "March3-eclipse-fixed",
+      "regionId": "shackleton-peak",
+      "startUtc": "2026-03-03T10:00:00Z",
+      "durationHours": 3,
+      "mode": "fixed",
+      "azimuthDeg": 240,
+      "initialChargeWh": 50,
+      "point": {
+        "regionId": "shackleton-peak",
+        "eastM": 0,
+        "northM": 0,
+        "panelHeightM": 2,
+        "antennaHeightM": 2
+      },
+      "equipment": {
+        "panel": {
+          "areaM2": 2,
+          "efficiency": 0.28,
+          "deratingFactor": 0.8,
+          "mode": "fixed",
+          "tiltDeg": 80,
+          "azimuthDeg": 240
+        },
+        "battery": {
+          "capacityWh": 2000,
+          "initialChargeWh": 50,
+          "reserveWh": 200,
+          "chargeEfficiency": 0.9,
+          "dischargeEfficiency": 0.9
+        },
+        "loadW": 100
+      },
+      "sourceModel": "scenario-v1-b566937932d4",
+      "sourceUtcStart": "2026-03-03T10:00:00Z",
+      "sourceUtcEnd": "2026-03-03T13:00:00.000Z",
+      "sunCentreHorizonPercent": 100,
+      "legacy": {
+        "generatedWh": 265.36174170159853,
+        "minBatteryWh": 0,
+        "unmetLoadWh": 66.06883585057916,
+        "endingBatteryWh": 57.01761118761527,
+        "spilledWh": 0,
+        "conservationResidualWh": -2.842170943040401e-14
+      },
+      "production": {
+        "generatedWh": 265.30373679861174,
+        "minBatteryWh": 0,
+        "unmetLoadWh": 66.29470472049297,
+        "endingBatteryWh": 57.419836892816335,
+        "spilledWh": 0,
+        "conservationResidualWh": 3.161915174132446e-13
+      },
+      "reference": {
+        "generatedWh": 264.7333001414063,
+        "minBatteryWh": 0,
+        "unmetLoadWh": 66.83981122006116,
+        "endingBatteryWh": 57.42202426792608,
+        "spilledWh": 0,
+        "conservationResidualWh": -7.158718062783009e-13
+      },
+      "legacyDelta": {
+        "generatedWh": 0.6284415601922433,
+        "generatedRelativePercent": 0.2373866679622713,
+        "minBatteryWh": 0,
+        "minBatteryRelativePercent": null,
+        "minBatteryPercentCapacity": 0,
+        "unmetLoadWh": -0.7709753694820023,
+        "unmetLoadRelativePercent": 1.1534673055010116,
+        "unmetLoadPercentDemand": 0.2569917898273341
+      },
+      "delta": {
+        "generatedWh": 0.5704366572054482,
+        "generatedRelativePercent": 0.21547597408439045,
+        "minBatteryWh": 0,
+        "minBatteryRelativePercent": null,
+        "minBatteryPercentCapacity": 0,
+        "unmetLoadWh": -0.5451064995681918,
+        "unmetLoadRelativePercent": 0.8155416504297137,
+        "unmetLoadPercentDemand": 0.1817021665227306
+      },
+      "eclipseCheck": {
+        "utc": "2026-03-03T11:30:00.000Z",
+        "sunCentreHorizonClearanceDeg": 1.2621598674845802,
+        "visibleDiscFraction": 0,
+        "terrainOnlyVisibleDiscFraction": 1
+      },
+      "timingMs": {
+        "legacy": 2.4774169999982405,
+        "production": 10.381541999999172,
+        "reference": 145.92383400000108
+      },
+      "referenceConvergence": null
+    },
+    {
+      "id": "March3-eclipse-high-charge",
+      "regionId": "shackleton-peak",
+      "startUtc": "2026-03-03T10:00:00Z",
+      "durationHours": 3,
+      "mode": "sun-tracking",
+      "initialChargeWh": 1000,
+      "point": {
+        "regionId": "shackleton-peak",
+        "eastM": 0,
+        "northM": 0,
+        "panelHeightM": 2,
+        "antennaHeightM": 2
+      },
+      "equipment": {
+        "panel": {
+          "areaM2": 2,
+          "efficiency": 0.28,
+          "deratingFactor": 0.8,
+          "mode": "sun-tracking",
+          "tiltDeg": 80,
+          "azimuthDeg": 0
+        },
+        "battery": {
+          "capacityWh": 2000,
+          "initialChargeWh": 1000,
+          "reserveWh": 200,
+          "chargeEfficiency": 0.9,
+          "dischargeEfficiency": 0.9
+        },
+        "loadW": 100
+      },
+      "sourceModel": "scenario-v1-b566937932d4",
+      "sourceUtcStart": "2026-03-03T10:00:00Z",
+      "sourceUtcEnd": "2026-03-03T13:00:00.000Z",
+      "sunCentreHorizonPercent": 100,
+      "legacy": {
+        "generatedWh": 270.0558692427206,
+        "minBatteryWh": 879.1549690528278,
+        "unmetLoadWh": 0,
+        "endingBatteryWh": 937.954535122571,
+        "spilledWh": 0,
+        "conservationResidualWh": -4.369837824924616e-13
+      },
+      "production": {
+        "generatedWh": 269.9955214374748,
+        "minBatteryWh": 878.8558967386608,
+        "unmetLoadWh": 0,
+        "endingBatteryWh": 938.0904105561483,
+        "spilledWh": 0,
+        "conservationResidualWh": 1.0658141036401503e-12
+      },
+      "reference": {
+        "generatedWh": 269.415321368735,
+        "minBatteryWh": 878.2453551186203,
+        "unmetLoadWh": 0,
+        "endingBatteryWh": 937.4787385592301,
+        "spilledWh": 0,
+        "conservationResidualWh": 7.180034344855812e-12
+      },
+      "legacyDelta": {
+        "generatedWh": 0.6405478739855539,
+        "generatedRelativePercent": 0.23775480575169988,
+        "minBatteryWh": 0.9096139342075276,
+        "minBatteryRelativePercent": 0.10357173299079624,
+        "minBatteryPercentCapacity": 0.04548069671037638,
+        "unmetLoadWh": 0,
+        "unmetLoadRelativePercent": null,
+        "unmetLoadPercentDemand": 0
+      },
+      "delta": {
+        "generatedWh": 0.5802000687397708,
+        "generatedRelativePercent": 0.21535526108616537,
+        "minBatteryWh": 0.6105416200405216,
+        "minBatteryRelativePercent": 0.06951834319215486,
+        "minBatteryPercentCapacity": 0.03052708100202608,
+        "unmetLoadWh": 0,
+        "unmetLoadRelativePercent": null,
+        "unmetLoadPercentDemand": 0
+      },
+      "eclipseCheck": {
+        "utc": "2026-03-03T11:30:00.000Z",
+        "sunCentreHorizonClearanceDeg": 1.2621598674845802,
+        "visibleDiscFraction": 0,
+        "terrainOnlyVisibleDiscFraction": 1
+      },
+      "timingMs": {
+        "legacy": 2.278542000000016,
+        "production": 10.997707999998966,
+        "reference": 149.04308400000082
+      },
+      "referenceConvergence": null
+    },
+    {
+      "id": "application-default-A",
+      "regionId": "connecting-ridge",
+      "startUtc": "2026-11-04T00:00:00Z",
+      "durationHours": 48,
+      "mode": "sun-tracking",
+      "applicationDefaults": true,
+      "point": {
+        "regionId": "connecting-ridge",
+        "eastM": 0,
+        "northM": 0,
+        "panelHeightM": 2,
+        "antennaHeightM": 2
+      },
+      "equipment": {
+        "panel": {
+          "areaM2": 2,
+          "efficiency": 0.28,
+          "deratingFactor": 0.75,
+          "mode": "sun-tracking",
+          "tiltDeg": 80,
+          "azimuthDeg": 0
+        },
+        "battery": {
+          "capacityWh": 2000,
+          "initialChargeWh": 1600,
+          "reserveWh": 400,
+          "chargeEfficiency": 0.95,
+          "dischargeEfficiency": 0.95
+        },
+        "loadW": 80
+      },
+      "sourceModel": "scenario-v1-b566937932d4",
+      "sourceUtcStart": "2026-11-04T00:00:00Z",
+      "sourceUtcEnd": "2026-11-06T00:00:00.000Z",
+      "sunCentreHorizonPercent": 0,
+      "legacy": {
+        "generatedWh": 851.2147532427712,
+        "minBatteryWh": 0,
+        "unmetLoadWh": 1808.4425696855894,
+        "endingBatteryWh": 322.6744567819464,
+        "spilledWh": 0,
+        "conservationResidualWh": -1.0757617019407917e-11
+      },
+      "production": {
+        "generatedWh": 856.5730424193056,
+        "minBatteryWh": 0,
+        "unmetLoadWh": 1801.7417764462664,
+        "endingBatteryWh": 321.3990779222741,
+        "spilledWh": 0,
+        "conservationResidualWh": 6.129141638666624e-11
+      },
+      "reference": {
+        "generatedWh": 852.2820949200404,
+        "minBatteryWh": 0,
+        "unmetLoadWh": 1804.7673983603015,
+        "endingBatteryWh": 320.1970186162839,
+        "spilledWh": 0,
+        "conservationResidualWh": -2.76685341304983e-11
+      },
+      "legacyDelta": {
+        "generatedWh": -1.067341677269269,
+        "generatedRelativePercent": 0.12523338031281828,
+        "minBatteryWh": 0,
+        "minBatteryRelativePercent": null,
+        "minBatteryPercentCapacity": 0,
+        "unmetLoadWh": 3.67517132528792,
+        "unmetLoadRelativePercent": 0.2036368414360183,
+        "unmetLoadPercentDemand": 0.09570758659603958
+      },
+      "delta": {
+        "generatedWh": 4.290947499265144,
+        "generatedRelativePercent": 0.5034656394685509,
+        "minBatteryWh": 0,
+        "minBatteryRelativePercent": null,
+        "minBatteryPercentCapacity": 0,
+        "unmetLoadWh": -3.0256219140351277,
+        "unmetLoadRelativePercent": 0.16764608651419668,
+        "unmetLoadPercentDemand": 0.07879223734466478
+      },
+      "eclipseCheck": null,
+      "timingMs": {
+        "legacy": 35.56804199999897,
+        "production": 161.22875000000204,
+        "reference": 2300.0567910000027
+      },
+      "referenceConvergence": null
+    }
+  ]
+}

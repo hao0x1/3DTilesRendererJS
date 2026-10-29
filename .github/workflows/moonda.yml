@@ -36,3 +36,5 @@ jobs:
       - run: python scripts/test-data.py
       - run: python scripts/prepare-visual-terrain.py --verify-only
       - run: python scripts/prepare-visuals.py --verify-only
+      - run: python scripts/prepare-scenario-terrain.py --verify-only
+      - run: python -I -S scripts/prepare-scenario-ephemeris.py --verify-only

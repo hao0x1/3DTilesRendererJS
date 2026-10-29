@@ -216,16 +216,21 @@ export function excludeTerrainSkirtsFromShadows(mesh: THREE.Mesh) {
   return true;
 }
 
-/** Seat the illustrative lander on the active visible surface, never the observer. */
-export function anchorLanderToTerrain(lander: THREE.Group, terrain: THREE.Object3D) {
+/** Raycast measured surface triangles only, excluding hidden LODs and skirts. */
+export function raycastVisibleTerrain(ray: THREE.Raycaster, terrain: THREE.Object3D) {
   terrain.updateWorldMatrix(true, true);
   const surfaces: THREE.Mesh[] = [];
   terrain.traverseVisible(child => { if (child instanceof THREE.Mesh) surfaces.push(child); });
-  const ray = new THREE.Raycaster(new THREE.Vector3(lander.position.x, 20_000, lander.position.z), new THREE.Vector3(0, -1, 0), 0, 40_000);
-  const hit = ray.intersectObjects(surfaces, false).find(intersection => {
+  return ray.intersectObjects(surfaces, false).find(intersection => {
     const n = intersection.object.userData.gridSize;
     return !Number.isInteger(n) || intersection.faceIndex == null || intersection.faceIndex * 3 < 6 * (n - 1) ** 2;
   });
+}
+
+/** Seat the illustrative lander on the active visible surface, never the observer. */
+export function anchorLanderToTerrain(lander: THREE.Group, terrain: THREE.Object3D) {
+  const ray = new THREE.Raycaster(new THREE.Vector3(lander.position.x, 20_000, lander.position.z), new THREE.Vector3(0, -1, 0), 0, 40_000);
+  const hit = raycastVisibleTerrain(ray, terrain);
   if (!hit?.face) return false;
   const normal = hit.face.normal.clone().transformDirection(hit.object.matrixWorld);
   if (normal.y < 0) normal.negate();
@@ -266,6 +271,7 @@ export function genericLander(observerHeightM: number) {
   const antenna = add(new THREE.SphereGeometry(0.34, 16, 10, 0, Math.PI * 2, 0, Math.PI / 2), white, 0.3, 2.85, 0);
   antenna.rotation.z = -0.6;
   const panel = add(new THREE.BoxGeometry(2.7, 0.055, 1.4), dark, -2.2, 1.85, 0);
+  panel.name = 'illustrative-body-panel';
   panel.rotation.z = 0.16;
   strut(new THREE.Vector3(-0.9, 1.5, 0), new THREE.Vector3(-2.2, 1.85, 0));
   // Place the illustration beside the actual observer, leaving that origin untouched.

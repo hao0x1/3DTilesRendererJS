@@ -1,0 +1,484 @@
+{
+  "spice": {
+    "method": "Finite deterministic validation; sampled maxima are not global physical error bounds.",
+    "reference": "spkcpo(target, exactEt, MOON_ME_DE421, OBSERVER, CN+S, positionM/1000, MOON, MOON_ME_DE421)",
+    "angularMetric": "atan2(norm(cross(unitApprox,unitExact)),dot(unitApprox,unitExact)); no polar azimuth subtraction",
+    "withheldEpochCount": 269,
+    "withheldFractionsOfHour": [
+      0.25,
+      0.5,
+      0.75,
+      0.123456789
+    ],
+    "additionalExplicitEclipsePhaseEpochsUtc": [
+      "2026-03-03T07:15:00Z",
+      "2026-03-03T08:45:00Z",
+      "2026-03-03T09:15:00Z",
+      "2026-03-03T10:15:00Z",
+      "2026-03-03T10:45:00Z",
+      "2026-03-03T11:15:00Z",
+      "2026-03-03T11:30:00Z",
+      "2026-03-03T11:45:00Z",
+      "2026-03-03T12:15:00Z",
+      "2026-03-03T13:15:00Z",
+      "2026-03-03T13:45:00Z",
+      "2026-03-03T14:15:00Z",
+      "2026-03-03T15:45:00Z"
+    ],
+    "exactSampleEpochCount": 65,
+    "exactSampleChecksInclude": [
+      "2026-01-01T00:00:00Z",
+      "2026-01-04T00:00:00Z",
+      "2028-01-01T00:00:00Z"
+    ],
+    "actualTerrainObserverCount": 300,
+    "actualTerrainGrid": "5 by 5 points per site's central geodesic square, east/north -2560..2560 m",
+    "observerHeightsM": [
+      0,
+      2,
+      10,
+      100
+    ],
+    "actualSampledSurfaceHeightRangeM": [
+      -154.61836674900832,
+      1940.3706501956067
+    ],
+    "stressSurfaceHeightsM": [
+      -5000,
+      11000
+    ],
+    "stressObserverHeightsM": [
+      0,
+      100
+    ],
+    "terrainSources": [
+      {
+        "site": "connecting-ridge",
+        "source": "Site01_final_adj_5mpp_surf.tif",
+        "sha256": "3ba7b97cb00a2bcf21189c3aeb535f65afc21207154ab9f0d43c5bdc1f7e747e"
+      },
+      {
+        "site": "shackleton-rim",
+        "source": "Site04_final_adj_5mpp_surf.tif",
+        "sha256": "38ff70dbdf2f066c2cfa94a646c3a59d653ce7f6b4528b15fc1b43ee397ce758"
+      },
+      {
+        "site": "shackleton-peak",
+        "source": "Site07_final_adj_5mpp_surf.tif",
+        "sha256": "38aaee10bb4da4d63e7427aa1ca25c79bdbc649d212079a04990e135462091f8"
+      }
+    ],
+    "utcFractionToEtMaximumErrorSeconds": 4.76837158203125e-07,
+    "interpolationVsExactMoonCenter": {
+      "sun": {
+        "comparisons": 269,
+        "angularSeparationArcsec": {
+          "maximum": 3.478456684497738e-07,
+          "rms": 1.250542125631112e-07,
+          "p95": 2.699591859020477e-07
+        },
+        "absoluteRangeErrorM": {
+          "maximum": 2.474700927734375,
+          "rms": 1.5483311586537711,
+          "p95": 2.459918212890625
+        },
+        "positionDifferenceM": {
+          "maximum": 2.4753982058007464,
+          "rms": 1.5509827613013076,
+          "p95": 2.4614631255064077
+        },
+        "absoluteDistanceErrorAU": {
+          "maximum": 1.6542353952998978e-11,
+          "rms": 1.034995452414398e-11,
+          "p95": 1.644353760772228e-11
+        }
+      },
+      "earth": {
+        "comparisons": 269,
+        "angularSeparationArcsec": {
+          "maximum": 2.3384498652155033e-06,
+          "rms": 6.863679620660514e-07,
+          "p95": 1.3391826933061935e-06
+        },
+        "absoluteRangeErrorM": {
+          "maximum": 0.003061830997467041,
+          "rms": 0.0010064864138740674,
+          "p95": 0.0020004391670227053
+        },
+        "positionDifferenceM": {
+          "maximum": 0.004131725234547009,
+          "rms": 0.0016136061182260013,
+          "p95": 0.002789976755310212
+        },
+        "absoluteDistanceErrorAU": {
+          "maximum": 2.0467076056230532e-14,
+          "rms": 6.72794612092074e-15,
+          "p95": 1.3372109894761392e-14
+        }
+      }
+    },
+    "exactSampleMoonCenterTranslationVsSpkcpo": {
+      "sun": {
+        "comparisons": 19500,
+        "angularSeparationArcsec": {
+          "maximum": 8.310099949779966e-05,
+          "rms": 3.368235232206515e-05,
+          "p95": 7.09651427410495e-05
+        },
+        "absoluteRangeErrorM": {
+          "maximum": 9.090789794921875,
+          "rms": 3.7021942138552415,
+          "p95": 6.617005920410156
+        },
+        "positionDifferenceM": {
+          "maximum": 61.15252511197098,
+          "rms": 24.70390396164013,
+          "p95": 51.70607793716246
+        },
+        "absoluteDistanceErrorAU": {
+          "maximum": 6.076817639438416e-11,
+          "rms": 2.47476397660735e-11,
+          "p95": 4.4231952563547793e-11
+        }
+      },
+      "earth": {
+        "comparisons": 19500,
+        "angularSeparationArcsec": {
+          "maximum": 0.09628971769658734,
+          "rms": 0.0653838979837755,
+          "p95": 0.09003207344673218
+        },
+        "absoluteRangeErrorM": {
+          "maximum": 9.257254540920258,
+          "rms": 3.7893839783704397,
+          "p95": 6.833756539225578
+        },
+        "positionDifferenceM": {
+          "maximum": 174.39550599184906,
+          "rms": 122.17353259379264,
+          "p95": 171.5889089807283
+        },
+        "absoluteDistanceErrorAU": {
+          "maximum": 6.188092449179664e-11,
+          "rms": 2.533046734314541e-11,
+          "p95": 4.568084095882508e-11
+        }
+      }
+    },
+    "interpolatedActualObserverVsSpkcpo": {
+      "sun": {
+        "comparisons": 80700,
+        "angularSeparationArcsec": {
+          "maximum": 8.373551162372486e-05,
+          "rms": 3.3609877368862305e-05,
+          "p95": 6.993311531341886e-05
+        },
+        "absoluteRangeErrorM": {
+          "maximum": 10.426025390625,
+          "rms": 4.233945330285135,
+          "p95": 7.609875488281251
+        },
+        "positionDifferenceM": {
+          "maximum": 60.70071338598171,
+          "rms": 24.734069308006763,
+          "p95": 50.78388297077738
+        },
+        "absoluteDistanceErrorAU": {
+          "maximum": 6.969367506261571e-11,
+          "rms": 2.830217643121263e-11,
+          "p95": 5.086887569103115e-11
+        },
+        "worstAngularCase": {
+          "site": "shackleton-peak",
+          "eastM": 2560,
+          "northM": 2560,
+          "latitudeDeg": -88.72196451075881,
+          "longitudeDeg": 127.49553588102256,
+          "surfaceHeightM": 1178.9722046329516,
+          "observerHeightM": 100,
+          "utc": "2026-11-14T04:30:00Z"
+        }
+      },
+      "earth": {
+        "comparisons": 80700,
+        "angularSeparationArcsec": {
+          "maximum": 0.09618139699848095,
+          "rms": 0.06373539508457812,
+          "p95": 0.09363867912136431
+        },
+        "absoluteRangeErrorM": {
+          "maximum": 9.322028815746307,
+          "rms": 3.9161780628255416,
+          "p95": 6.797435349225998
+        },
+        "positionDifferenceM": {
+          "maximum": 175.25822817414513,
+          "rms": 119.16200198897836,
+          "p95": 170.94434828315792
+        },
+        "absoluteDistanceErrorAU": {
+          "maximum": 6.231391377515313e-11,
+          "rms": 2.6178033447273804e-11,
+          "p95": 4.543804879988842e-11
+        },
+        "worstAngularCase": {
+          "site": "shackleton-rim",
+          "eastM": 0,
+          "northM": 0,
+          "latitudeDeg": -89.80235284999999,
+          "longitudeDeg": -154.29004622,
+          "surfaceHeightM": 1703.3072836515753,
+          "observerHeightM": 100,
+          "utc": "2027-12-20T11:07:24.444440Z"
+        }
+      }
+    },
+    "interpolatedStressObserverVsSpkcpo": {
+      "sun": {
+        "comparisons": 7344,
+        "angularSeparationArcsec": {
+          "maximum": 8.396901500563693e-05,
+          "rms": 3.405178161140575e-05,
+          "p95": 7.036786972531797e-05
+        },
+        "absoluteRangeErrorM": {
+          "maximum": 8.88330078125,
+          "rms": 4.164687162998578,
+          "p95": 7.60595397949218
+        },
+        "positionDifferenceM": {
+          "maximum": 60.16562549831352,
+          "rms": 25.030832002719652,
+          "p95": 51.21273822960638
+        },
+        "absoluteDistanceErrorAU": {
+          "maximum": 5.938119800558097e-11,
+          "rms": 2.7839214178057e-11,
+          "p95": 5.0842662023879865e-11
+        }
+      },
+      "earth": {
+        "comparisons": 7344,
+        "angularSeparationArcsec": {
+          "maximum": 0.09665676416010717,
+          "rms": 0.06724680381234056,
+          "p95": 0.09451970091057971
+        },
+        "absoluteRangeErrorM": {
+          "maximum": 9.072309374809265,
+          "rms": 3.9144521073100846,
+          "p95": 6.689651414752004
+        },
+        "positionDifferenceM": {
+          "maximum": 174.81478038573596,
+          "rms": 125.95172011294468,
+          "p95": 170.89833641376214
+        },
+        "absoluteDistanceErrorAU": {
+          "maximum": 6.06446424160853e-11,
+          "rms": 2.616649614726157e-11,
+          "p95": 4.4717557699516136e-11
+        }
+      }
+    }
+  },
+  "independentHorizons": {
+    "startUtc": "2026-11-01T00:00:00Z",
+    "endUtc": "2026-12-01T00:00:00Z",
+    "epochCountPerSiteAndBody": 721,
+    "siteCount": 3,
+    "bodyCount": 2,
+    "comparison": "Airless Horizons azimuth/elevation converted to fixed-frame unit directions for validation only; cache is independently generated from SPICE kernels.",
+    "limitations": "Horizons baseline uses DE441 and its MEAN_ME realization; this cache uses DE421/MOON_ME_DE421. Differences include ephemeris/frame versions, Horizons' observer corrections, and printed azimuth/elevation precision; they are not solely cache interpolation error. Baseline contains no range quantity.",
+    "results": {
+      "connecting-ridge/sun": {
+        "epochs": 721,
+        "cacheVsHorizonsAngularArcsec": {
+          "maximum": 0.050647694629354784,
+          "rms": 0.03196609402715359,
+          "p95": 0.04845446706371698
+        },
+        "exactSpkcpoVsHorizonsAngularArcsec": {
+          "maximum": 0.050653880914669415,
+          "rms": 0.03196588536121462,
+          "p95": 0.0484611131371302
+        }
+      },
+      "connecting-ridge/earth": {
+        "epochs": 721,
+        "cacheVsHorizonsAngularArcsec": {
+          "maximum": 0.1382268213350893,
+          "rms": 0.08030930526124584,
+          "p95": 0.13464992276853582
+        },
+        "exactSpkcpoVsHorizonsAngularArcsec": {
+          "maximum": 0.044660033698070985,
+          "rms": 0.036074909827854114,
+          "p95": 0.04323820109113888
+        }
+      },
+      "shackleton-rim/sun": {
+        "epochs": 721,
+        "cacheVsHorizonsAngularArcsec": {
+          "maximum": 0.050927922691304243,
+          "rms": 0.03197395017283572,
+          "p95": 0.04860087256973737
+        },
+        "exactSpkcpoVsHorizonsAngularArcsec": {
+          "maximum": 0.050935198296810404,
+          "rms": 0.03197469694141077,
+          "p95": 0.048607922635581516
+        }
+      },
+      "shackleton-rim/earth": {
+        "epochs": 721,
+        "cacheVsHorizonsAngularArcsec": {
+          "maximum": 0.13839920634006891,
+          "rms": 0.08032334227179522,
+          "p95": 0.13428423526460553
+        },
+        "exactSpkcpoVsHorizonsAngularArcsec": {
+          "maximum": 0.044350983338137494,
+          "rms": 0.03603224438968342,
+          "p95": 0.043354952532829484
+        }
+      },
+      "shackleton-peak/sun": {
+        "epochs": 721,
+        "cacheVsHorizonsAngularArcsec": {
+          "maximum": 0.05081270005018864,
+          "rms": 0.03193137107341307,
+          "p95": 0.04840989441349539
+        },
+        "exactSpkcpoVsHorizonsAngularArcsec": {
+          "maximum": 0.05083791375314746,
+          "rms": 0.03193501640875321,
+          "p95": 0.04843201297329408
+        }
+      },
+      "shackleton-peak/earth": {
+        "epochs": 721,
+        "cacheVsHorizonsAngularArcsec": {
+          "maximum": 0.13815073693646912,
+          "rms": 0.08025273101451082,
+          "p95": 0.13398875339621144
+        },
+        "exactSpkcpoVsHorizonsAngularArcsec": {
+          "maximum": 0.0447523967846412,
+          "rms": 0.03602113716904892,
+          "p95": 0.04319083548125245
+        }
+      }
+    },
+    "sources": [
+      {
+        "site": "connecting-ridge",
+        "body": "sun",
+        "cachedFile": "connecting-ridge-sun-07563ae8b6.json",
+        "cachedFileSha256": "0ab16cd53e082ac0ff7ea21be892583228a6d762dd449bed6ef87698211578b4",
+        "resultSha256": "237f6770eef27fa38fe5a5951cfa1dcd0dd0e39225564b63932ece19f1676321",
+        "requestUrl": "https://ssd.jpl.nasa.gov/api/horizons.api?format=json&EPHEM_TYPE=%27OBSERVER%27&CENTER=%27coord%40301%27&COORD_TYPE=%27GEODETIC%27&SITE_COORD=%27-137.5845134460%2C-89.4621897254%2C1.94237064%27&START_TIME=%272026-11-01+00%3A00%27&STOP_TIME=%272026-12-01+00%3A00%27&STEP_SIZE=%271+h%27&QUANTITIES=%274%27&APPARENT=%27AIRLESS%27&CSV_FORMAT=%27YES%27&ANG_FORMAT=%27DEG%27&TIME_DIGITS=%27MINUTES%27&TIME_TYPE=%27UT%27&COMMAND=%2710%27",
+        "signature": {
+          "source": "NASA/JPL Horizons API",
+          "version": "1.2"
+        },
+        "sourceDescriptions": [
+          "Target body name: Sun (10)                        {source: DE441}",
+          "Center body name: Moon (301)                      {source: DE441}",
+          "Center pole/equ : MEAN_ME (high precision)        {East-longitude positive}",
+          "Center radii    : 1737.4, 1737.4, 1737.4 km       {Equator_a, b, pole_c}"
+        ]
+      },
+      {
+        "site": "connecting-ridge",
+        "body": "earth",
+        "cachedFile": "connecting-ridge-earth-360ac35f89.json",
+        "cachedFileSha256": "a5209862829884765877e4ab8b6525aca640028f4b98cca8b1cb1c08a2826aa1",
+        "resultSha256": "2551e04480076c283cc17aeea845707e19d7408098b271b4cc743485881b8e74",
+        "requestUrl": "https://ssd.jpl.nasa.gov/api/horizons.api?format=json&EPHEM_TYPE=%27OBSERVER%27&CENTER=%27coord%40301%27&COORD_TYPE=%27GEODETIC%27&SITE_COORD=%27-137.5845134460%2C-89.4621897254%2C1.94237064%27&START_TIME=%272026-11-01+00%3A00%27&STOP_TIME=%272026-12-01+00%3A00%27&STEP_SIZE=%271+h%27&QUANTITIES=%274%27&APPARENT=%27AIRLESS%27&CSV_FORMAT=%27YES%27&ANG_FORMAT=%27DEG%27&TIME_DIGITS=%27MINUTES%27&TIME_TYPE=%27UT%27&COMMAND=%27399%27",
+        "signature": {
+          "version": "1.2",
+          "source": "NASA/JPL Horizons API"
+        },
+        "sourceDescriptions": [
+          "Target body name: Earth (399)                     {source: DE441}",
+          "Center body name: Moon (301)                      {source: DE441}",
+          "Center pole/equ : MEAN_ME (high precision)        {East-longitude positive}",
+          "Center radii    : 1737.4, 1737.4, 1737.4 km       {Equator_a, b, pole_c}"
+        ]
+      },
+      {
+        "site": "shackleton-rim",
+        "body": "sun",
+        "cachedFile": "shackleton-rim-sun-d2a16107be.json",
+        "cachedFileSha256": "0bef0a9dc0f8a5694b894db3ef14cc808b7785db814e5adbdd60fd95df1251f2",
+        "resultSha256": "0e22b0a975adf6098fe155bdad9744f3719ef57c371401a9e3b9e85560e23539",
+        "requestUrl": "https://ssd.jpl.nasa.gov/api/horizons.api?format=json&EPHEM_TYPE=%27OBSERVER%27&CENTER=%27coord%40301%27&COORD_TYPE=%27GEODETIC%27&SITE_COORD=%27-154.2900462192%2C-89.8023528535%2C1.70530728%27&START_TIME=%272026-11-01+00%3A00%27&STOP_TIME=%272026-12-01+00%3A00%27&STEP_SIZE=%271+h%27&QUANTITIES=%274%27&APPARENT=%27AIRLESS%27&CSV_FORMAT=%27YES%27&ANG_FORMAT=%27DEG%27&TIME_DIGITS=%27MINUTES%27&TIME_TYPE=%27UT%27&COMMAND=%2710%27",
+        "signature": {
+          "version": "1.2",
+          "source": "NASA/JPL Horizons API"
+        },
+        "sourceDescriptions": [
+          "Target body name: Sun (10)                        {source: DE441}",
+          "Center body name: Moon (301)                      {source: DE441}",
+          "Center pole/equ : MEAN_ME (high precision)        {East-longitude positive}",
+          "Center radii    : 1737.4, 1737.4, 1737.4 km       {Equator_a, b, pole_c}"
+        ]
+      },
+      {
+        "site": "shackleton-rim",
+        "body": "earth",
+        "cachedFile": "shackleton-rim-earth-f23d23564e.json",
+        "cachedFileSha256": "bd11a7fd1edd604e0b88cd9d28558e04bb9a8c3dd2899509db479856cece1c32",
+        "resultSha256": "0cbb48d921ceae09271feaf6185036dec7d69c2be1a9245f7b4ca89b47233ca0",
+        "requestUrl": "https://ssd.jpl.nasa.gov/api/horizons.api?format=json&EPHEM_TYPE=%27OBSERVER%27&CENTER=%27coord%40301%27&COORD_TYPE=%27GEODETIC%27&SITE_COORD=%27-154.2900462192%2C-89.8023528535%2C1.70530728%27&START_TIME=%272026-11-01+00%3A00%27&STOP_TIME=%272026-12-01+00%3A00%27&STEP_SIZE=%271+h%27&QUANTITIES=%274%27&APPARENT=%27AIRLESS%27&CSV_FORMAT=%27YES%27&ANG_FORMAT=%27DEG%27&TIME_DIGITS=%27MINUTES%27&TIME_TYPE=%27UT%27&COMMAND=%27399%27",
+        "signature": {
+          "version": "1.2",
+          "source": "NASA/JPL Horizons API"
+        },
+        "sourceDescriptions": [
+          "Target body name: Earth (399)                     {source: DE441}",
+          "Center body name: Moon (301)                      {source: DE441}",
+          "Center pole/equ : MEAN_ME (high precision)        {East-longitude positive}",
+          "Center radii    : 1737.4, 1737.4, 1737.4 km       {Equator_a, b, pole_c}"
+        ]
+      },
+      {
+        "site": "shackleton-peak",
+        "body": "sun",
+        "cachedFile": "shackleton-peak-sun-e91036aafc.json",
+        "cachedFileSha256": "f10722471790c18af15a16876ab85e71bcbaa0906c30bd7e428b25604610434c",
+        "resultSha256": "d945e58365034ff5c0ddf22668ab4d3200a0a444f8824419893b8777699c43f8",
+        "requestUrl": "https://ssd.jpl.nasa.gov/api/horizons.api?format=json&EPHEM_TYPE=%27OBSERVER%27&CENTER=%27coord%40301%27&COORD_TYPE=%27GEODETIC%27&SITE_COORD=%27123.7076699154%2C-88.8091789306%2C1.65020963%27&START_TIME=%272026-11-01+00%3A00%27&STOP_TIME=%272026-12-01+00%3A00%27&STEP_SIZE=%271+h%27&QUANTITIES=%274%27&APPARENT=%27AIRLESS%27&CSV_FORMAT=%27YES%27&ANG_FORMAT=%27DEG%27&TIME_DIGITS=%27MINUTES%27&TIME_TYPE=%27UT%27&COMMAND=%2710%27",
+        "signature": {
+          "version": "1.2",
+          "source": "NASA/JPL Horizons API"
+        },
+        "sourceDescriptions": [
+          "Target body name: Sun (10)                        {source: DE441}",
+          "Center body name: Moon (301)                      {source: DE441}",
+          "Center pole/equ : MEAN_ME (high precision)        {East-longitude positive}",
+          "Center radii    : 1737.4, 1737.4, 1737.4 km       {Equator_a, b, pole_c}"
+        ]
+      },
+      {
+        "site": "shackleton-peak",
+        "body": "earth",
+        "cachedFile": "shackleton-peak-earth-91d9d1e22c.json",
+        "cachedFileSha256": "bd135bb532a9aeb23ccc139b0327d0cd4aca715f8ad677a235b1723719e6ed32",
+        "resultSha256": "d13cd10381fc317a0047b73ba80963674b14e5cbd1daad98061e8cd398d983bc",
+        "requestUrl": "https://ssd.jpl.nasa.gov/api/horizons.api?format=json&EPHEM_TYPE=%27OBSERVER%27&CENTER=%27coord%40301%27&COORD_TYPE=%27GEODETIC%27&SITE_COORD=%27123.7076699154%2C-88.8091789306%2C1.65020963%27&START_TIME=%272026-11-01+00%3A00%27&STOP_TIME=%272026-12-01+00%3A00%27&STEP_SIZE=%271+h%27&QUANTITIES=%274%27&APPARENT=%27AIRLESS%27&CSV_FORMAT=%27YES%27&ANG_FORMAT=%27DEG%27&TIME_DIGITS=%27MINUTES%27&TIME_TYPE=%27UT%27&COMMAND=%27399%27",
+        "signature": {
+          "version": "1.2",
+          "source": "NASA/JPL Horizons API"
+        },
+        "sourceDescriptions": [
+          "Target body name: Earth (399)                     {source: DE441}",
+          "Center body name: Moon (301)                      {source: DE441}",
+          "Center pole/equ : MEAN_ME (high precision)        {East-longitude positive}",
+          "Center radii    : 1737.4, 1737.4, 1737.4 km       {Equator_a, b, pole_c}"
+        ]
+      }
+    ]
+  }
+}

@@ -4,9 +4,40 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { Ellipsoid, GlobeControls, TilesRenderer } from '3d-tiles-renderer/three';
 import { ArrowCounterClockwise, ArrowDown, ArrowsOut, Crosshair, GlobeHemisphereWest, Sun } from '@phosphor-icons/react';
 import { sampleAt } from './science';
-import type { Site } from './types';
-import { anchorLanderToTerrain, applyLunarRelief, createTerrainShadowMaterial, disposeObject, excludeTerrainSkirtsFromShadows, genericLander, terrainMesh } from './sceneAssets';
+import type { Horizon, Site, SkySample, Terrain } from './types';
+import { anchorLanderToTerrain, applyLunarRelief, createTerrainShadowMaterial, disposeObject, excludeTerrainSkirtsFromShadows, genericLander, raycastVisibleTerrain, terrainMesh } from './sceneAssets';
 import type { ImageAsset, TerrainVisualEntry, TerrainVisualManifest, VisualAssetManifest } from './sceneAssets';
+import { lunarArcDestination, lunarArcOffsets, lunarPointToScene, scenePointToLunar } from './sceneCoordinates';
+import type { LunarFrameOrigin, LunarGroundPoint, ScenePoint } from './sceneCoordinates';
+import { observerPose, scenarioObserverMarker } from './sceneScenarioVisuals';
+import type { SceneObserverMarker } from './sceneScenarioVisuals';
+
+export type { SceneObserverMarker } from './sceneScenarioVisuals';
+
+export interface SceneObserverView extends LunarGroundPoint {
+  heightM: number;
+  horizon: Horizon;
+  /** Both bodies must be computed at this component's own position/height. */
+  sample: SkySample;
+  sunAngularRadiusDeg?: number;
+  earthAngularRadiusDeg?: number;
+  /** Local display approximation of Earth-only solar occultation. */
+  earthBlockedSolarFraction?: number;
+}
+
+export interface SceneTerrainPick {
+  regionId: string;
+  latitudeDeg: number;
+  longitudeDeg: number;
+  arcEastM: number;
+  arcNorthM: number;
+  displayPoint: ScenePoint;
+  /** Preview only: lock jobs must re-sample the scientific DEM. */
+  displayGroundHeightM: number;
+  supported: boolean;
+  status?: 'pending' | 'valid' | 'invalid';
+  message?: string;
+}
 
 export type SceneMode = 'globe' | 'terrain' | 'surface';
 export interface SceneProps {
@@ -17,6 +48,19 @@ export interface SceneProps {
   mode: SceneMode;
   onSelectSite: (id: string) => void;
   onModeChange?: (mode: SceneMode) => void;
+  analysisObservers?: { panel: SceneObserverView; antenna: SceneObserverView };
+  analysisStatus?: 'loading' | 'ready' | 'error';
+  observerView?: 'panel' | 'antenna';
+  onObserverViewChange?: (view: 'panel' | 'antenna') => void;
+  observers?: SceneObserverMarker[];
+  activeObserverId?: 'A' | 'B';
+  onActivateObserver?: (id: 'A' | 'B') => void;
+  pickingEnabled?: boolean;
+  pickingDomain?: Terrain['bounds'];
+  candidate?: SceneTerrainPick | null;
+  onTerrainPick?: (pick: SceneTerrainPick) => void;
+  onLockCandidate?: () => void;
+  onCancelCandidate?: () => void;
 }
 
 const MOON_RADIUS = 1_737_400;
@@ -35,14 +79,14 @@ function localDirection(azimuth: number, elevation: number) {
   return new THREE.Vector3(Math.sin(az) * Math.cos(el), Math.sin(el), -Math.cos(az) * Math.cos(el));
 }
 
-function worldDirection(site: Site, azimuth: number, elevation: number) {
+function worldDirection(site: Pick<Site, 'latitudeDeg' | 'longitudeDeg'>, azimuth: number, elevation: number) {
   const east = new THREE.Vector3(), north = new THREE.Vector3(), up = new THREE.Vector3();
   moonEllipsoid.getEastNorthUpAxes(site.latitudeDeg * DEG, site.longitudeDeg * DEG, east, north, up);
   const direction = localDirection(azimuth, elevation);
   return east.multiplyScalar(direction.x).add(north.multiplyScalar(-direction.z)).add(up.multiplyScalar(direction.y));
 }
 
-function horizonGeometry(site: Site, enabled: boolean) {
+function horizonGeometry(site: Pick<Site, 'horizon' | 'observerHeightM'>, enabled: boolean) {
   const profile = site.horizon.elevationDeg;
   const positions: number[] = [];
   const count = profile.length, radius = 45_000;
@@ -65,6 +109,8 @@ export default function Scene(props: SceneProps) {
   const runtime = useRef<{ update: (next: SceneProps) => void; focus: (body: 'sun' | 'earth' | 'reset' | 'marker') => void; setInspectionLighting: (enabled: boolean) => void } | null>(null);
   const currentProps = useRef(props);
   const labels = useRef<Record<string, HTMLButtonElement | null>>({});
+  const scenarioLabels = useRef<Record<string, HTMLButtonElement | null>>({});
+  const candidateLabel = useRef<HTMLDivElement | null>(null);
   const [error, setError] = useState('');
   const [generation, setGeneration] = useState(0);
   const [loadingTerrain, setLoadingTerrain] = useState(false);
@@ -72,6 +118,10 @@ export default function Scene(props: SceneProps) {
   const [terrainQuality, setTerrainQuality] = useState('Local NASA terrain');
   const [inspectionLight, setInspectionLight] = useState(true);
   const inspectionRef = useRef(true);
+  const [viewComponent, setViewComponent] = useState<'panel' | 'antenna'>(props.observerView ?? 'panel');
+  const componentRef = useRef<'panel' | 'antenna'>(props.observerView ?? 'panel');
+  const resolvedView = props.observerView ?? viewComponent;
+  componentRef.current = resolvedView;
   currentProps.current = props;
 
   useEffect(() => {
@@ -202,10 +252,10 @@ export default function Scene(props: SceneProps) {
     flatGround.rotation.x = -Math.PI / 2;
     flatGround.receiveShadow = true;
     localScene.add(flatGround);
-    const sunDistance = 120_000;
-    const sunMesh = new THREE.Mesh(new THREE.SphereGeometry(Math.tan(0.266 * DEG) * sunDistance, 48, 32), new THREE.MeshBasicMaterial({ color: '#fff1c6', toneMapped: false }));
+    const sunDistance = 120_000, earthDistance = 80_000;
+    const sunMesh = new THREE.Mesh(new THREE.SphereGeometry(1, 48, 32), new THREE.MeshBasicMaterial({ color: '#fff1c6', toneMapped: false }));
     const earthMaterial = new THREE.MeshStandardMaterial({ color: '#ffffff', roughness: 1, metalness: 0 });
-    const earthMesh = new THREE.Mesh(new THREE.SphereGeometry(Math.tan(0.95 * DEG) * sunDistance, 96, 64), earthMaterial);
+    const earthMesh = new THREE.Mesh(new THREE.SphereGeometry(1, 96, 64), earthMaterial);
     // Render celestial appearance separately with the same depth buffer, so
     // the terrain inspection fill cannot accidentally brighten Earth's night.
     const celestialScene = new THREE.Scene();
@@ -216,7 +266,105 @@ export default function Scene(props: SceneProps) {
     localScene.add(horizon);
     let marker: ReturnType<typeof genericLander> | null = null;
     let markerGroundDirty = true;
+    let analysisProfile: Horizon | null = null, analysisPoseKey = '', skyKey = '', observerLocationKey = '';
+    let pendingFocus: 'sun' | 'earth' | null = null;
+    let scenarioVisualKey = '', candidateVisualKey = '';
+    let pickGesture: { pointerId: number; x: number; y: number; moved: boolean } | null = null;
+    const scenarioGroups = new Map<string, THREE.Group>();
+    const scenarioVisuals = new THREE.Group(); localScene.add(scenarioVisuals);
+    let candidateVisual: THREE.Group | null = null;
     let sunDirection = new THREE.Vector3(1, 0, 0), earthDirection = new THREE.Vector3(0, 0, -1);
+
+    function frameOrigin(): LunarFrameOrigin {
+      const origin = loadedTerrainEntry?.origin;
+      return {
+        latitudeDeg: origin?.latitudeDeg ?? state.selectedSite.latitudeDeg,
+        longitudeDeg: origin?.longitudeDeg ?? state.selectedSite.longitudeDeg,
+        groundHeightM: origin?.centerHeightM ?? state.selectedSite.terrain.centerHeightM ?? 0,
+        referenceRadiusM: state.selectedSite.terrain.referenceRadiusM,
+      };
+    }
+
+    function analysisView(): SceneObserverView {
+      if (state.analysisObservers) return state.analysisObservers[state.mode === 'surface' ? componentRef.current : 'panel'];
+      return {
+        latitudeDeg: state.selectedSite.latitudeDeg, longitudeDeg: state.selectedSite.longitudeDeg,
+        groundHeightM: state.selectedSite.terrain.centerHeightM ?? 0,
+        heightM: state.selectedSite.observerHeightM, horizon: state.selectedSite.horizon,
+        sample: sampleAt(state.selectedSite, state.timeIndex, state.terrainEnabled),
+      };
+    }
+
+    function skySignature(view: SceneObserverView) {
+      return JSON.stringify({
+        latitude: view.latitudeDeg, longitude: view.longitudeDeg, ground: view.groundHeightM, height: view.heightM,
+        sample: view.sample, sunRadius: view.sunAngularRadiusDeg, earthRadius: view.earthAngularRadiusDeg,
+        earthBlocked: view.earthBlockedSolarFraction,
+      });
+    }
+
+    function refreshAnalysisHorizon() {
+      if (state.analysisStatus && state.analysisStatus !== 'ready') return;
+      const view = analysisView();
+      const key = `${view.latitudeDeg},${view.longitudeDeg},${view.groundHeightM},${view.heightM},${state.terrainEnabled}`;
+      if (view.horizon === analysisProfile && key === analysisPoseKey) return;
+      analysisProfile = view.horizon; analysisPoseKey = key;
+      localScene.remove(horizon); horizon.geometry.dispose();
+      horizon = new THREE.Mesh(horizonGeometry({ horizon: view.horizon, observerHeightM: view.heightM }, state.terrainEnabled), horizonMaterial);
+      const pose = observerPose(frameOrigin(), view);
+      horizon.position.copy(pose.point); horizon.quaternion.copy(pose.orientation);
+      localScene.add(horizon);
+    }
+
+    function syncScenarioVisuals() {
+      const entries = (state.observers ?? []).filter(observer => observer.regionId === state.selectedSite.id);
+      const active = state.activeObserverId ?? entries[0]?.id;
+      const key = JSON.stringify(entries.map(({ panelNormalEnu: _normal, ...observer }) => ({ ...observer, detailed: observer.id === active })));
+      if (key !== scenarioVisualKey) {
+        scenarioVisualKey = key;
+        for (const group of scenarioGroups.values()) { scenarioVisuals.remove(group); disposeObject(group); }
+        scenarioGroups.clear();
+        for (const observer of entries) {
+          const group = scenarioObserverMarker(frameOrigin(), observer, observer.id === active);
+          scenarioGroups.set(observer.id, group); scenarioVisuals.add(group);
+        }
+        markerGroundDirty = true;
+      }
+      for (const observer of entries) {
+        const panel = scenarioGroups.get(observer.id)?.getObjectByName('solar-panel');
+        if (panel && observer.panelNormalEnu) {
+          const { east, north, up } = observer.panelNormalEnu;
+          const normal = new THREE.Vector3(east, up, -north);
+          if (normal.lengthSq() > 0 && normal.toArray().every(Number.isFinite)) panel.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), normal.normalize());
+        }
+      }
+      if (marker) {
+        const observer = entries.find(entry => entry.id === active);
+        const base = observer ? observerPose(frameOrigin(), observer) : null;
+        const offset = new THREE.Vector3(7, 0, 3);
+        if (base) offset.applyQuaternion(base.orientation).add(base.point);
+        if (Math.hypot(marker.lander.position.x - offset.x, marker.lander.position.z - offset.z) > 0.0001) {
+          marker.lander.position.copy(offset); markerGroundDirty = true;
+        }
+        const panel = marker.lander.getObjectByName('illustrative-body-panel');
+        if (panel) panel.visible = !observer;
+      }
+      const candidate = state.candidate?.regionId === state.selectedSite.id ? state.candidate : null;
+      const candidateKey = JSON.stringify(candidate);
+      if (candidateKey !== candidateVisualKey) {
+        candidateVisualKey = candidateKey;
+        if (candidateVisual) { scenarioVisuals.remove(candidateVisual); disposeObject(candidateVisual); candidateVisual = null; }
+        if (candidate) {
+          candidateVisual = new THREE.Group();
+          candidateVisual.position.set(candidate.displayPoint.x, candidate.displayPoint.y, candidate.displayPoint.z);
+          candidateVisual.quaternion.copy(observerPose(frameOrigin(), { ...candidate, groundHeightM: candidate.displayGroundHeightM }).orientation);
+          const material = new THREE.MeshBasicMaterial({ color: candidate.supported && candidate.status !== 'invalid' ? '#d8eff1' : '#ec9a86', side: THREE.DoubleSide, depthWrite: false });
+          const ring = new THREE.Mesh(new THREE.RingGeometry(2.8, 3.5, 64), material);
+          ring.rotation.x = -Math.PI / 2; ring.position.y = 0.12;
+          candidateVisual.add(ring); scenarioVisuals.add(candidateVisual);
+        }
+      }
+    }
 
     function invalidate() {
       if (!disposed && !frame) frame = requestAnimationFrame(draw);
@@ -354,6 +502,8 @@ export default function Scene(props: SceneProps) {
       marker = genericLander(site.observerHeightM);
       markerGroundDirty = true;
       localScene.add(marker.lander, marker.observer);
+      scenarioVisualKey = ''; analysisProfile = null;
+      syncScenarioVisuals(); refreshAnalysisHorizon(); updateSky();
       if (!preserveCamera) {
         const home = terrainHome();
         terrainCamera.position.copy(home.position); orbitControls.target.copy(home.target); orbitControls.update();
@@ -372,14 +522,34 @@ export default function Scene(props: SceneProps) {
     }).catch(() => {});
 
     function updateSky() {
-      const sample = sampleAt(state.selectedSite, state.timeIndex, state.terrainEnabled);
-      surfaceCamera.position.set(0, state.selectedSite.observerHeightM, 0);
-      sunDirection = localDirection(sample.sunAz, sample.sunEl);
-      earthDirection = localDirection(sample.earthAz, sample.earthEl);
+      if (state.analysisStatus && state.analysisStatus !== 'ready') return;
+      const view = analysisView(), sample = view.sample;
+      skyKey = skySignature(view);
+      const locationKey = `${state.activeObserverId ?? ''},${view.latitudeDeg},${view.longitudeDeg},${state.mode === 'surface' ? componentRef.current : 'panel'}`;
+      if (observerLocationKey !== locationKey) {
+        observerLocationKey = locationKey;
+        const antenna = state.mode === 'surface' && componentRef.current === 'antenna';
+        yaw = (antenna ? sample.earthAz : sample.sunAz) * DEG;
+        pitch = (antenna ? sample.earthEl : Math.max(3, Math.min(10, sample.sunEl + 4))) * DEG;
+      }
+      const pose = observerPose(frameOrigin(), view);
+      surfaceCamera.position.copy(pose.point).addScaledVector(pose.up, view.heightM);
+      surfaceCamera.up.copy(pose.up);
+      const angularRadius = (value: number | undefined, fallback: number) => value != null && Number.isFinite(value) && value > 0 && value < 30 ? value : fallback;
+      sunMesh.scale.setScalar(Math.sin(angularRadius(view.sunAngularRadiusDeg, 0.266) * DEG) * sunDistance);
+      earthMesh.scale.setScalar(Math.sin(angularRadius(view.earthAngularRadiusDeg, 0.95) * DEG) * earthDistance);
+      const earthBlocked = view.earthBlockedSolarFraction;
+      const visibleSun = earthBlocked != null && Number.isFinite(earthBlocked) ? 1 - THREE.MathUtils.clamp(earthBlocked, 0, 1) : 1;
+      surfaceLight.intensity = 3 * visibleSun;
+      host!.dataset.eclipseLightFraction = visibleSun.toFixed(6);
+      flatGround.position.copy(pose.point);
+      flatGround.quaternion.copy(pose.orientation).multiply(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1, 0, 0), -Math.PI / 2));
+      sunDirection = localDirection(sample.sunAz, sample.sunEl).applyQuaternion(pose.orientation);
+      earthDirection = localDirection(sample.earthAz, sample.earthEl).applyQuaternion(pose.orientation);
       surfaceLight.position.copy(sunDirection).multiplyScalar(100_000);
       surfaceLight.target.position.set(0, 0, 0);
       celestialLight.position.copy(surfaceLight.position);
-      globeLight.position.copy(worldDirection(state.selectedSite, sample.sunAz, sample.sunEl)).multiplyScalar(10_000_000);
+      globeLight.position.copy(worldDirection(view, sample.sunAz, sample.sunEl)).multiplyScalar(10_000_000);
       // Rotation is an appearance cue; the Earth phase is illuminated by the
       // same topocentric Sun direction used by the selected lunar observer.
       const time = new Date(sample.timeUtc).getTime() / 1000;
@@ -407,10 +577,42 @@ export default function Scene(props: SceneProps) {
         element.setAttribute('aria-hidden', visible ? 'false' : 'true');
         element.tabIndex = visible ? 0 : -1;
       }
+      if (state.mode !== 'terrain') return;
+      const camera = state.mode === 'terrain' ? terrainCamera : surfaceCamera;
+      const projectLabel = (element: HTMLElement | null | undefined, point: THREE.Vector3, show: boolean, offsetX = 0, offsetY = 0) => {
+        if (!element) return;
+        const projected = point.project(camera);
+        const visible = show && state.mode === 'terrain' && projected.z > -1 && projected.z < 1 && Math.abs(projected.x) < 0.97 && Math.abs(projected.y) < 0.95;
+        element.style.opacity = visible ? '1' : '0'; element.style.pointerEvents = visible && element instanceof HTMLButtonElement ? 'auto' : 'none';
+        element.style.left = `${(projected.x * 0.5 + 0.5) * host!.clientWidth + offsetX}px`;
+        element.style.top = `${(-projected.y * 0.5 + 0.5) * host!.clientHeight + offsetY}px`;
+        element.style.setProperty('--label-offset-x', `${offsetX}px`); element.style.setProperty('--label-offset-y', `${offsetY}px`);
+        element.setAttribute('aria-hidden', visible ? 'false' : 'true');
+        if (element instanceof HTMLButtonElement) element.tabIndex = visible ? 0 : -1;
+      };
+      const anchors = (state.observers ?? []).filter(observer => observer.regionId === state.selectedSite.id).map(observer => {
+        const pose = observerPose(frameOrigin(), observer);
+        const height = observer.id === state.activeObserverId ? Math.max(observer.antennaHeightM, observer.panelHeightM) : 4;
+        const point = pose.point.addScaledVector(pose.up, height + 1), screen = point.clone().project(camera);
+        return { observer, point, screen: new THREE.Vector2(screen.x * host!.clientWidth / 2, screen.y * host!.clientHeight / 2) };
+      });
+      for (const observer of state.observers ?? []) {
+        if (observer.regionId !== state.selectedSite.id) projectLabel(scenarioLabels.current[observer.id], new THREE.Vector3(), false);
+      }
+      for (const anchor of anchors) {
+        const overlaps = anchors.some(other => other !== anchor && other.screen.distanceTo(anchor.screen) < 70);
+        projectLabel(scenarioLabels.current[anchor.observer.id], anchor.point, true, overlaps ? anchor.observer.id === 'A' ? -24 : 24 : 0);
+      }
+      const candidate = state.candidate;
+      const candidatePoint = candidate ? new THREE.Vector3(candidate.displayPoint.x, candidate.displayPoint.y + 2, candidate.displayPoint.z) : new THREE.Vector3();
+      const candidateScreen = candidatePoint.clone().project(camera);
+      const candidateOverlap = anchors.some(anchor => anchor.screen.distanceTo(new THREE.Vector2(candidateScreen.x * host!.clientWidth / 2, candidateScreen.y * host!.clientHeight / 2)) < 70);
+      projectLabel(candidateLabel.current, candidatePoint, Boolean(candidate && candidate.regionId === state.selectedSite.id), 0, candidateOverlap ? -38 : 0);
     }
 
     function updateSurfaceOrientation() {
-      surfaceCamera.lookAt(surfaceCamera.position.clone().add(localDirection(yaw / DEG, pitch / DEG)));
+      const pose = observerPose(frameOrigin(), analysisView());
+      surfaceCamera.lookAt(surfaceCamera.position.clone().add(localDirection(yaw / DEG, pitch / DEG).applyQuaternion(pose.orientation)));
     }
 
     function refreshLocalClipping() {
@@ -453,7 +655,7 @@ export default function Scene(props: SceneProps) {
         // display translation follows the exploration camera to remove false
         // kilometre-scale parallax while panning around the terrain.
         sunMesh.position.copy(sunDirection).multiplyScalar(sunDistance).add(camera.position);
-        earthMesh.position.copy(earthDirection).multiplyScalar(sunDistance).add(camera.position);
+        earthMesh.position.copy(earthDirection).multiplyScalar(earthDistance).add(camera.position);
       }
       terrainGroup.visible = state.terrainEnabled || state.mode === 'terrain';
       if (marker && markerGroundDirty && state.mode === 'terrain') {
@@ -463,6 +665,8 @@ export default function Scene(props: SceneProps) {
         }
       }
       const inspect = state.mode === 'terrain' && inspectionLighting;
+      const analysisReady = !state.analysisStatus || state.analysisStatus === 'ready';
+      surfaceLight.visible = analysisReady;
       surfaceLight.castShadow = !inspect;
       surfaceAmbient.intensity = inspect ? 0.42 : 0.065;
       inspectionFill.visible = inspect;
@@ -473,15 +677,16 @@ export default function Scene(props: SceneProps) {
         inspectionFill.target.position.copy(orbitControls.target);
       }
       flatGround.visible = state.mode === 'surface' && !state.terrainEnabled;
-      horizon.visible = state.mode === 'surface';
-      if (marker) { marker.lander.visible = marker.observer.visible = state.mode === 'terrain'; }
+      horizon.visible = state.mode === 'surface' && analysisReady;
+      scenarioVisuals.visible = state.mode === 'terrain';
+      if (marker) { marker.lander.visible = state.mode === 'terrain'; marker.observer.visible = state.mode === 'terrain' && !state.observers?.length; }
       skyCamera.fov = camera.fov; skyCamera.aspect = camera.aspect;
       skyCamera.quaternion.copy(camera.quaternion); skyCamera.updateProjectionMatrix();
       renderer.info.reset();
       renderer.setClearColor('#05080d', 1); renderer.clear();
       renderer.render(skyScene, skyCamera); renderer.clearDepth();
       renderer.render(state.mode === 'globe' ? globeScene : localScene, camera);
-      if (state.mode !== 'globe') renderer.render(celestialScene, camera);
+      if (state.mode !== 'globe' && analysisReady) renderer.render(celestialScene, camera);
       camera.updateMatrixWorld(); updateLabels();
       framesRendered++;
       host!.dataset.framesRendered = String(framesRendered);
@@ -495,36 +700,31 @@ export default function Scene(props: SceneProps) {
       host!.dataset.cameraPlanes = `${camera.near.toFixed(2)},${camera.far.toFixed(0)}`;
       host!.dataset.depthMode = renderer.capabilities.logarithmicDepthBuffer ? 'Logarithmic depth' : 'Linear depth';
       host!.dataset.mode = state.mode;
-      host!.dataset.analysisObserver = `${state.selectedSite.id} · ${state.selectedSite.observerHeightM} m`;
+      const view = analysisView();
+      host!.dataset.analysisObserver = `${state.activeObserverId ?? state.selectedSite.id} · ${state.mode === 'surface' ? componentRef.current : 'panel'} · ${view.latitudeDeg},${view.longitudeDeg} · ${view.heightM} m`;
       host!.dataset.lightingMode = inspect ? 'Inspection fill · display only' : 'Modeled Sun';
       host!.dataset.shadowQuality = `${shadowSize} px · terrain filter-footprint caster bias · 0.25 m receiver bias`;
     }
 
     function update(next: SceneProps) {
       const changedSite = siteId !== next.selectedSite.id;
-      const changedTerrain = state.terrainEnabled !== next.terrainEnabled;
-      const changedTime = state.timeIndex !== next.timeIndex;
       state = next;
       globeControls.enabled = state.mode === 'globe' && !globeTarget;
       orbitControls.enabled = state.mode === 'terrain' && !orbitTarget;
       renderer.domElement.setAttribute('aria-label', state.mode === 'globe'
         ? 'Interactive Moon with measured global relief. Drag to orbit and scroll to zoom. Nearby site markers separate when zoomed in.'
         : state.mode === 'terrain'
-          ? 'Free lunar terrain exploration. Drag to orbit, right-drag to pan, scroll to zoom. Analysis remains anchored at the selected observer.'
+          ? state.pickingEnabled ? 'Click visible terrain to preview a landing point. Drag to orbit; analysis changes only when a point is locked.' : 'Free lunar terrain exploration. Drag to orbit, right-drag to pan, scroll to zoom. Analysis remains anchored at the selected observer.'
           : 'Horizon at the fixed lunar observer. Drag or use arrow keys to look around. Scroll changes optical zoom without moving the observer.');
       if (changedSite) {
         siteId = state.selectedSite.id; loadTerrain(state.selectedSite);
-        const sample = sampleAt(state.selectedSite, state.timeIndex, state.terrainEnabled);
+        const sample = analysisView().sample;
         yaw = sample.sunAz * DEG; pitch = Math.max(3, Math.min(10, sample.sunEl + 4)) * DEG;
         const target = desiredGlobePosition(state.selectedSite);
         if (!globeCamera.position.lengthSq() || reduceMotion) { globeCamera.position.copy(target); globeCamera.lookAt(0, 0, 0); globeControls.adjustCamera(globeCamera); }
         else { globeTarget = target; globeControls.enabled = false; }
       }
-      if (changedSite || changedTerrain) {
-        localScene.remove(horizon); horizon.geometry.dispose();
-        horizon = new THREE.Mesh(horizonGeometry(state.selectedSite, state.terrainEnabled), horizonMaterial);
-        localScene.add(horizon);
-      }
+      syncScenarioVisuals(); refreshAnalysisHorizon();
       if (state.mode !== previousMode) {
         previousMode = state.mode;
         renderer.shadowMap.needsUpdate = true;
@@ -532,7 +732,14 @@ export default function Scene(props: SceneProps) {
         requestAnimationFrame(() => { if (!disposed) host!.classList.add('scene-arriving'); });
         configureTileCamera();
       }
-      if (changedSite || changedTime) updateSky();
+      const view = analysisView();
+      const nextSkyKey = skySignature(view);
+      if (skyKey !== nextSkyKey) updateSky();
+      if (pendingFocus && componentRef.current === (pendingFocus === 'sun' ? 'panel' : 'antenna')) {
+        yaw = (pendingFocus === 'sun' ? view.sample.sunAz : view.sample.earthAz) * DEG;
+        pitch = (pendingFocus === 'sun' ? view.sample.sunEl : view.sample.earthEl) * DEG;
+        pendingFocus = null;
+      }
       invalidate();
     }
 
@@ -556,19 +763,57 @@ export default function Scene(props: SceneProps) {
     }
 
     function pointerDown(event: PointerEvent) {
+      pickGesture = state.mode === 'terrain' && state.pickingEnabled && event.button === 0 ? { pointerId: event.pointerId, x: event.clientX, y: event.clientY, moved: false } : null;
       if (state.mode === 'globe') { globeTarget = null; globeControls.enabled = true; }
       else if (state.mode === 'terrain') { orbitTarget = null; orbitControls.enabled = true; }
       else { dragging = { x: event.clientX, y: event.clientY }; renderer.domElement.setPointerCapture(event.pointerId); }
       invalidate();
     }
     function pointerMove(event: PointerEvent) {
+      if (pickGesture && Math.hypot(event.clientX - pickGesture.x, event.clientY - pickGesture.y) > 5) pickGesture.moved = true;
       if (state.mode === 'surface' && dragging) {
         yaw -= (event.clientX - dragging.x) * 0.004;
         pitch = THREE.MathUtils.clamp(pitch + (event.clientY - dragging.y) * 0.004, -70 * DEG, 85 * DEG);
         dragging = { x: event.clientX, y: event.clientY }; invalidate();
       }
     }
-    function pointerUp() { dragging = null; }
+    function pickTerrain(event: PointerEvent) {
+      const bounds = renderer.domElement.getBoundingClientRect();
+      if (!bounds.width || !bounds.height || event.clientX < bounds.left || event.clientX > bounds.right || event.clientY < bounds.top || event.clientY > bounds.bottom) return;
+      const ndc = new THREE.Vector2((event.clientX - bounds.left) / bounds.width * 2 - 1, 1 - (event.clientY - bounds.top) / bounds.height * 2);
+      const ray = new THREE.Raycaster();
+      terrainCamera.updateMatrixWorld(); ray.setFromCamera(ndc, terrainCamera);
+      const hit = raycastVisibleTerrain(ray, terrainGroup);
+      if (!hit) return;
+      const origin = frameOrigin(), geographic = scenePointToLunar(origin, hit.point);
+      const rawOffsets = lunarArcOffsets(origin, geographic), domain = state.pickingDomain;
+      const offsets = { eastM: Math.round(rawOffsets.eastM / 10) * 10, northM: Math.round(rawOffsets.northM / 10) * 10 };
+      const snapped = lunarArcDestination(origin, offsets.eastM, offsets.northM);
+      let displayHeight = geographic.groundHeightM;
+      let position = lunarPointToScene(origin, { ...snapped, groundHeightM: displayHeight });
+      // Reproject after the first height estimate so a coarse preview's
+      // radius cannot leave the snapped latitude/longitude off its vertex.
+      for (let i = 0; i < 2; i++) {
+        position = lunarPointToScene(origin, { ...snapped, groundHeightM: displayHeight });
+        const down = new THREE.Raycaster(new THREE.Vector3(position.x, 20_000, position.z), new THREE.Vector3(0, -1, 0), 0, 40_000);
+        const surface = raycastVisibleTerrain(down, terrainGroup);
+        if (!surface) break;
+        position.y = surface.point.y;
+        displayHeight = scenePointToLunar(origin, position).groundHeightM;
+      }
+      const supported = Boolean(domain && offsets.eastM >= domain.eastMinM && offsets.eastM <= domain.eastMaxM && offsets.northM >= domain.northMinM && offsets.northM <= domain.northMaxM);
+      state.onTerrainPick?.({
+        regionId: state.selectedSite.id, latitudeDeg: snapped.latitudeDeg, longitudeDeg: snapped.longitudeDeg,
+        arcEastM: offsets.eastM, arcNorthM: offsets.northM,
+        displayPoint: position, displayGroundHeightM: displayHeight,
+        supported, message: !domain ? 'Prepared-area bounds are loading.' : supported ? '10 m selection grid. Lock to sample the scientific terrain and calculate horizons.' : 'Outside the prepared 5.12 km area. Choose a point closer to the current region centre.',
+      });
+    }
+    function pointerUp(event: PointerEvent) {
+      const shouldPick = event.type === 'pointerup' && pickGesture?.pointerId === event.pointerId && !pickGesture.moved && state.mode === 'terrain' && state.pickingEnabled;
+      pickGesture = null; dragging = null;
+      if (shouldPick) pickTerrain(event);
+    }
     function wheel(event: WheelEvent) {
       if (state.mode !== 'surface') return;
       event.preventDefault();
@@ -606,9 +851,25 @@ export default function Scene(props: SceneProps) {
         inspectionLighting = enabled; invalidate();
       },
       focus(body) {
-        const sample = sampleAt(state.selectedSite, state.timeIndex, state.terrainEnabled);
+        if (body === 'sun' || body === 'earth') {
+          const component = body === 'sun' ? 'panel' : 'antenna';
+          state.onObserverViewChange?.(component);
+          if (state.observerView != null && state.observerView !== component) {
+            pendingFocus = body;
+            surfaceCamera.fov = body === 'earth' ? 30 : 45; surfaceCamera.updateProjectionMatrix();
+            invalidate(); return;
+          }
+          componentRef.current = component;
+          if (state.observerView == null) setViewComponent(component);
+          refreshAnalysisHorizon(); updateSky();
+        }
+        const sample = analysisView().sample;
         if (body === 'marker') {
-          orbitTarget = { position: new THREE.Vector3(16, 9, 18), target: new THREE.Vector3(3, 1.4, 1) };
+          const observer = state.observers?.find(entry => entry.id === state.activeObserverId && entry.regionId === state.selectedSite.id);
+          const pose = observer ? observerPose(frameOrigin(), observer) : null;
+          const position = new THREE.Vector3(16, 9, 18), target = new THREE.Vector3(3, 1.4, 1);
+          if (pose) { position.applyQuaternion(pose.orientation).add(pose.point); target.applyQuaternion(pose.orientation).add(pose.point); }
+          orbitTarget = { position, target };
           orbitControls.enabled = false;
           invalidate(); return;
         }
@@ -653,21 +914,36 @@ export default function Scene(props: SceneProps) {
     setInspectionLight(enabled);
     runtime.current?.setInspectionLighting(enabled);
   };
+  const surfaceView = props.analysisObservers?.[resolvedView];
+  const surfaceHeight = surfaceView?.heightM ?? props.selectedSite.observerHeightM;
+  const candidate = props.candidate?.regionId === props.selectedSite.id ? props.candidate : null;
+  const analysisReady = !props.analysisStatus || props.analysisStatus === 'ready';
 
   return <div className={`lunar-scene lunar-scene--${props.mode}`}>
     <div className="lunar-scene__canvas" ref={container} data-testid="lunar-canvas" />
     {props.mode === 'globe' && <div className="lunar-scene__pins" aria-label="Sites on the lunar globe">
       {props.sites.map((site, index) => <button key={site.id} ref={el => { labels.current[site.id] = el; }} className={`lunar-pin ${site.id === props.selectedSite.id ? 'is-selected' : ''}`} title={site.name} aria-label={`Select ${site.name}`} onClick={() => props.onSelectSite(site.id)}><span>{String(index + 1).padStart(2, '0')}</span><strong className="lunar-pin__label">{site.name}</strong></button>)}
     </div>}
+    {props.mode === 'terrain' && <div className="lunar-scene__pins" aria-label="Locked scenario positions">
+      {(props.observers ?? []).map(observer => <button key={observer.id} ref={element => { scenarioLabels.current[observer.id] = element; }} type="button" className={`scenario-scene-label ${observer.id === props.activeObserverId ? 'is-active' : ''}`} aria-label={`Activate scenario ${observer.id}`} aria-pressed={observer.id === props.activeObserverId} onClick={() => props.onActivateObserver?.(observer.id)}><i className="scenario-scene-label__leader" aria-hidden="true" /><span>{observer.id}</span><strong>{observer.id === props.activeObserverId ? 'Active observer' : 'Locked point'}</strong></button>)}
+      {candidate && <div ref={candidateLabel} className="scenario-scene-label is-candidate"><span>+</span><strong>Candidate</strong></div>}
+    </div>}
     {error ? <div className="scene-fallback" role="status"><p>{error}</p><button type="button" onClick={() => { setError(''); setGeneration(n => n + 1); }}>Retry 3D view</button></div> : <>
       <div className="scene-instructions"><span className="scene-status-dot" />{props.mode === 'globe' ? 'Drag to orbit · Scroll to explore' : props.mode === 'terrain' ? 'Drag to orbit · Right-drag to pan · Scroll to zoom' : 'Drag to look · Scroll for optical zoom'}</div>
-      {props.mode === 'surface' && <div className="scene-body-controls"><button type="button" onClick={() => runtime.current?.focus('sun')}><Sun size={16} />Look toward Sun</button><button type="button" onClick={() => runtime.current?.focus('earth')}><GlobeHemisphereWest size={16} />Look toward Earth</button></div>}
+      {!analysisReady && <div className="scene-pick-hint scene-analysis-status" role="status">{props.analysisStatus === 'loading' ? 'Calculating this observer… Sun, Earth and horizon appear when ready.' : 'This observer could not be calculated. Recalculate a supported point.'}</div>}
+      {props.mode === 'surface' && <div className="scene-body-controls"><button type="button" disabled={!analysisReady} aria-pressed={resolvedView === 'panel'} onClick={() => runtime.current?.focus('sun')}><Sun size={16} />{props.analysisObservers ? 'Panel · Look toward Sun' : 'Look toward Sun'}</button><button type="button" disabled={!analysisReady} aria-pressed={resolvedView === 'antenna'} onClick={() => runtime.current?.focus('earth')}><GlobeHemisphereWest size={16} />{props.analysisObservers ? 'Antenna · Look toward Earth' : 'Look toward Earth'}</button></div>}
+      {props.mode === 'terrain' && props.pickingEnabled && analysisReady && <div className="scene-pick-hint" role="status">10 m selection grid · Click ground to preview · Drag to explore · Lock to recalculate</div>}
+      {props.mode === 'terrain' && candidate && <div className={`scene-candidate-controls ${candidate.status === 'pending' ? 'is-loading' : !candidate.supported || candidate.status === 'invalid' ? 'is-error' : ''}`} role="status">
+        <strong>Candidate · {candidate.latitudeDeg.toFixed(5)}°, {candidate.longitudeDeg.toFixed(5)}°</strong>
+        <p>{candidate.message ?? (candidate.supported ? 'Preview only. Lock this point to calculate its scientific horizon.' : 'Outside the prepared area.')}</p>
+        <div className="scene-candidate-actions">{props.onLockCandidate && <button type="button" disabled={!candidate.supported || candidate.status === 'invalid' || candidate.status === 'pending'} onClick={props.onLockCandidate}>Lock point</button>}{props.onCancelCandidate && <button type="button" onClick={props.onCancelCandidate}>Cancel</button>}</div>
+      </div>}
       {props.mode === 'terrain' && <div className="scene-body-controls"><button type="button" title="Inspect an original generic lander and the fixed analysis observer mast; the lander is an illustrative scale reference." onClick={() => runtime.current?.focus('marker')}><Crosshair size={16} />Inspect scale reference</button><div className="scene-lighting-controls" role="group" aria-label="Terrain display lighting"><button type="button" aria-pressed={inspectionLight} title="Display-only fill light helps you inspect shaded terrain. Visibility analysis is unchanged." onClick={() => changeInspectionLighting(true)}>Inspection light</button><button type="button" aria-pressed={!inspectionLight} title="Use the selected time's modeled Sun direction. Cast shadows are display estimates; visibility results use the validated horizon." onClick={() => changeInspectionLighting(false)}><Sun size={14} />Sun lighting</button></div></div>}
       <div className="scene-corner-controls"><button type="button" aria-label="Reset camera" title="Reset camera" onClick={() => runtime.current?.focus('reset')}><ArrowCounterClockwise size={18} /></button>{props.onModeChange && <>
         {props.mode === 'terrain' && <button type="button" aria-label="Go to fixed horizon observer" title="Fixed horizon observer" onClick={() => props.onModeChange?.('surface')}><Crosshair size={18} /></button>}
         <button type="button" aria-label={props.mode === 'globe' ? 'Explore local terrain' : props.mode === 'surface' ? 'Explore terrain freely' : 'Return to lunar overview'} title={props.mode === 'globe' ? 'Explore local terrain' : props.mode === 'surface' ? 'Explore terrain freely' : 'Lunar overview'} onClick={() => props.onModeChange?.(props.mode === 'terrain' ? 'globe' : 'terrain')}>{props.mode === 'globe' ? <ArrowDown size={18} /> : <ArrowsOut size={18} />}</button>
       </>}</div>
-      <div className="surface-method">{props.mode === 'globe' ? visualQuality : props.mode === 'terrain' ? `${loadingTerrain ? 'Loading regional detail…' : terrainQuality} · ${inspectionLight ? 'Inspection light (display only)' : 'Sun lighting (estimated shadows)'} · Analysis remains at the fixed observer` : `Fixed observer ${props.selectedSite.observerHeightM} m above ground · ${loadingTerrain ? 'Loading local detail…' : terrainQuality} · Earth orientation is illustrative`}</div>
+      <div className="surface-method">{props.mode === 'globe' ? visualQuality : !analysisReady ? 'Observer analysis unavailable · Camera exploration remains independent' : props.mode === 'terrain' ? `${loadingTerrain ? 'Loading regional detail…' : terrainQuality} · ${inspectionLight ? 'Inspection light (display only)' : 'Sun lighting (estimated shadows)'} · Analysis remains at the locked observer` : `${props.activeObserverId ? `Scenario ${props.activeObserverId} · ` : ''}${surfaceView ? resolvedView === 'panel' ? 'Panel viewpoint' : 'Antenna viewpoint' : 'Fixed observer'} ${surfaceHeight} m above ground · ${loadingTerrain ? 'Loading local detail…' : terrainQuality} · Earth orientation is illustrative`}</div>
     </>}
   </div>;
 }

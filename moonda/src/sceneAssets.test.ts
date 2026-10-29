@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { DoubleSide, Group, Mesh, MeshBasicMaterial, PlaneGeometry, SphereGeometry, Vector3 } from 'three';
-import { anchorLanderToTerrain, applyLunarRelief, genericLander, terrainMesh } from './sceneAssets';
+import { BufferGeometry, DoubleSide, Float32BufferAttribute, Group, Mesh, MeshBasicMaterial, PlaneGeometry, Raycaster, SphereGeometry, Vector3 } from 'three';
+import { anchorLanderToTerrain, applyLunarRelief, genericLander, raycastVisibleTerrain, terrainMesh } from './sceneAssets';
 
 const radius = 1_737_400;
 const heightMetadata = {
@@ -92,5 +92,28 @@ describe('physical display terrain', () => {
     expect(observer.position.equals(observerPosition)).toBe(true);
     expect(observer.quaternion.equals(observerRotation)).toBe(true);
     plane.geometry.dispose(); plane.material.dispose();
+  });
+
+  it('picks visible measured faces and rejects a nearer hidden LOD and display skirt', () => {
+    const geometry = new BufferGeometry();
+    geometry.setAttribute('position', new Float32BufferAttribute([
+      -20, 0, -20, 20, 0, -20, 20, 0, 20, -20, 0, 20,
+      -10, 5, -10, 10, 5, -10, 0, 5, 10,
+    ], 3));
+    geometry.setIndex([0, 1, 2, 0, 2, 3, 4, 5, 6]);
+    const measured = new Mesh(geometry, new MeshBasicMaterial({ side: DoubleSide }));
+    measured.userData.gridSize = 2;
+    const terrain = new Group(); terrain.add(measured);
+    const hidden = new Group(); hidden.visible = false;
+    const obsolete = measured.clone(); obsolete.position.y = 10;
+    hidden.add(obsolete); terrain.add(hidden);
+    const ray = new Raycaster(new Vector3(0, 20, 0), new Vector3(0, -1, 0));
+    const hit = raycastVisibleTerrain(ray, terrain);
+    expect(hit?.object).toBe(measured);
+    expect(hit?.point.y).toBeCloseTo(0, 8);
+    expect(hit?.faceIndex).toBeLessThan(2);
+    measured.visible = false;
+    expect(raycastVisibleTerrain(ray, terrain)).toBeUndefined();
+    geometry.dispose(); measured.material.dispose();
   });
 });
