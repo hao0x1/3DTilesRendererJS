@@ -28,7 +28,7 @@ The calendar's Shift+Tab boundary restored focus to its trigger. Tab from Apply 
 ## Build and regression checks
 
 - 90 Vitest tests passed; focused caption tests and TypeScript checks also passed after the transition fix.
-- Production build passed. Offline package: 462 URLs, approximately 614 MB, revision `2ecf0b9934ec`.
+- Production build passed. Offline package: 462 URLs, approximately 614 MB, revision `01baa6d124f5`.
 - The existing in-app browser reported that matching build ready, then reloaded and rendered terrain with the production server stopped. The server was restarted afterward.
 - NASA rasters, SPICE states, analysis workers and energy/scenario calculation modules are unchanged by this UI follow-up. The production worker filenames remain `scenario.worker-Dfo2p0sX.js` and `analysis.worker-Ch07vOoK.js`.
 

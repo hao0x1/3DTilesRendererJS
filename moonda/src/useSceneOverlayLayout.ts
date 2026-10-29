@@ -38,8 +38,8 @@ export default function useSceneOverlayLayout(ref: RefObject<HTMLElement | null>
         node instanceof Element && (node.matches('.scene-header, .scene-controls-dock') || node.querySelector('.scene-header, .scene-controls-dock'))))) bind();
     });
     structure.observe(viewer, { childList: true, subtree: true });
-    bind();
     measure();
+    bind();
     return () => { observer.disconnect(); structure.disconnect(); cancelAnimationFrame(frame); };
   }, [ref, enabled]);
 }
