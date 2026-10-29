@@ -1,4 +1,4 @@
-import { useEffect, useId, useState } from 'react';
+import { useEffect, useId, useLayoutEffect, useRef, useState } from 'react';
 import { CaretDown, CircleNotch, Info, Sun } from '@phosphor-icons/react';
 import { DEFAULT_REFERENCE_IRRADIANCE_WM2 } from '../energy';
 import type { EnergyModel, EnergyResult } from '../energy';
@@ -43,6 +43,25 @@ function EnergyValue({ label, value, warning = false }: { label: string; value: 
 }
 
 export default function EnergyPanel({ scenarioId, model, result, pending = false, unavailableReason, currentTimeUtc, onChange, onSelectTime, sharedAcrossScenarios = false }: EnergyPanelProps) {
+  const resultRegion = useRef<HTMLDivElement>(null);
+  const previousResultHeight = useRef(0);
+  const [modelNotesOpen, setModelNotesOpen] = useState(false);
+  useLayoutEffect(() => {
+    const region = resultRegion.current;
+    if (!region || pending || !result) return;
+    const rememberHeight = () => {
+      const height = region.getBoundingClientRect().height;
+      if (Number.isFinite(height) && height > 0) previousResultHeight.current = Math.ceil(height);
+    };
+    rememberHeight();
+    if (typeof ResizeObserver === 'undefined') {
+      window.addEventListener('resize', rememberHeight);
+      return () => window.removeEventListener('resize', rememberHeight);
+    }
+    const observer = new ResizeObserver(rememberHeight);
+    observer.observe(region);
+    return () => observer.disconnect();
+  }, [pending, result]);
   const patchPanel = (patch: Partial<EnergyModel['panel']>) => onChange({ ...model, panel: { ...model.panel, ...patch } });
   const patchBattery = (patch: Partial<EnergyModel['battery']>) => onChange({ ...model, battery: { ...model.battery, ...patch } });
   const fixed = model.panel.mode === 'fixed';
@@ -65,12 +84,14 @@ export default function EnergyPanel({ scenarioId, model, result, pending = false
         <NumericControl label="Reference solar irradiance" unit="W/m²" value={model.referenceIrradianceWm2 ?? DEFAULT_REFERENCE_IRRADIANCE_WM2} min={0} max={10000} step={1} onChange={referenceIrradianceWm2 => onChange({ ...model, referenceIrradianceWm2 })} description="Reference at one astronomical unit; the model adjusts for Sun distance." />
       </div>
     </details>
+    <div ref={resultRegion} className="energy-results-region" aria-busy={pending} style={{ minHeight: pending && previousResultHeight.current > 0 ? previousResultHeight.current : undefined }}>
     {pending ? <div className="energy-pending" role="status"><CircleNotch size={19} className="loading-spinner" /><div><strong>Updating scenario estimates</strong><p>New results appear after the point, equipment heights and energy balance are calculated.</p></div></div> : !result ? <div className="energy-pending"><Info size={18} /><p>{unavailableReason || 'Energy estimates are unavailable until the locked scenario has a complete horizon calculation.'}</p></div> : <>
       <div className="energy-result-status"><span className={`energy-result-badge ${!result.complete || result.unmetLoadWh > 1e-6 || result.reserveBreached ? 'is-warning' : ''}`}>{status}</span><span>{number.format(result.coveredHours)} hours evaluated</span></div>
       {!result.complete && <p className="energy-partial-note">These estimates cover only the available part of the mission. Choose an earlier arrival or a shorter duration for a complete comparison.</p>}
       <div className="energy-summary-grid"><EnergyValue label="Solar generation" value={result.generatedWh} /><EnergyValue label="Load demand" value={result.loadWh} /><EnergyValue label="Minimum battery" value={result.minBatteryWh} warning={result.reserveBreached} /><EnergyValue label="Unmet load" value={result.unmetLoadWh} warning={result.unmetLoadWh > 1e-6} /></div>
       <EnergyChart points={result.series} generationIntervals={result.intervals} capacityWh={model.battery.capacityWh} reserveWh={model.battery.reserveWh} currentTimeUtc={currentTimeUtc} onSelectTime={onSelectTime} label={`Scenario ${scenarioId} · power and battery`} />
-      <details className="energy-model-limits"><summary>How to read these estimates<Info size={13} /></summary><ul>{result.assumptions.map((assumption, index) => <li key={index}>{assumption}</li>)}</ul><p>These are scenario estimates, not a qualified power-system design.</p></details>
+      <details className="energy-model-limits" open={modelNotesOpen} onToggle={event => setModelNotesOpen(event.currentTarget.open)}><summary>How to read these estimates<Info size={13} /></summary><ul>{result.assumptions.map((assumption, index) => <li key={index}>{assumption}</li>)}</ul><p>These are scenario estimates, not a qualified power-system design.</p></details>
     </>}
+    </div>
   </section>;
 }

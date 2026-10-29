@@ -175,8 +175,12 @@ export default function UTCDateTimePicker({ value, min, max, onChange }: UTCDate
 
   const changeMonth = (amount: number) => {
     const next = clamp(shiftMonth(focusedDay, amount), minimumDay, maximumDay);
+    const nextMonth = monthOf(next);
+    // At the coverage edge, the navigation button becomes disabled. Hand
+    // keyboard focus to the new calendar day instead of leaving it on body.
+    if (amount < 0 ? nextMonth <= monthOf(minimum) : nextMonth >= monthOf(maximum)) needsDayFocus.current = true;
     setFocusedDay(next);
-    setViewMonth(monthOf(next));
+    setViewMonth(nextMonth);
   };
 
   const adjustTime = (event: KeyboardEvent<HTMLInputElement>, current: string, limit: number, set: (value: string) => void) => {

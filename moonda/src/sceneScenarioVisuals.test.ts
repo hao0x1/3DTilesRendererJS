@@ -69,4 +69,55 @@ describe('scenario marker captions', () => {
     }
     expect(layoutSceneMarkerCaption('A', badges, 640, 360, { width: 180, height: 34 }, [{ x: 0, y: 0, width: 640, height: 360 }])).toBeNull();
   });
+
+  it('keeps the live A/B subpixel case below the same cluster when only hover owner changes', () => {
+    // Live DOM badge bounds were A(376,407.84375,31,31) and
+    // B(417,407.75,31,31). Their different bottoms must not pick sides.
+    const badges = [
+      { id: 'A', x: 391.5, y: 423.34375, anchorX: 391.5, anchorY: 423.34375, size: 31 },
+      { id: 'B', x: 432.5, y: 423.25, anchorX: 432.5, anchorY: 423.25, size: 31 },
+    ];
+    for (let i = -50; i <= 50; i++) {
+      const near = badges.map(badge => ({ ...badge, y: badge.y + i * 0.000001 }));
+      const a = layoutSceneMarkerCaption('A', near, 800, 650, { width: 150, height: 29.40625 })!;
+      const b = layoutSceneMarkerCaption('B', near, 800, 650, { width: 127, height: 29.40625 })!;
+      expect(a.side).toBe('below'); expect(b.side).toBe('below');
+      expect(a.y).toBe(b.y);
+      expect(a.y).toBeCloseTo(448.84375 + i * 0.000001, 8);
+      expect(a.x + a.width / 2).toBe(b.x + b.width / 2);
+      expect(a.clusterKey).toBe(b.clusterKey);
+    }
+  });
+
+  it('anchors A/B/candidate ownership to one connected envelope', () => {
+    const badges = layoutSceneMarkerBadges([{ id: 'A', x: 320, y: 240 }, { id: 'B', x: 320, y: 240 }, { id: 'candidate', x: 320, y: 240 }], 800, 600, 31);
+    const placements = ['A', 'B', 'candidate'].map(id => layoutSceneMarkerCaption(id, badges, 800, 600, { width: 180, height: 34 })!);
+    expect(new Set(placements.map(placement => placement.clusterKey)).size).toBe(1);
+    expect(new Set(placements.map(placement => placement.y)).size).toBe(1);
+    expect(placements.every(placement => placement.side === 'below')).toBe(true);
+  });
+
+  it('uses deterministic fallback sides, keeping a prior valid side until genuinely obstructed', () => {
+    const badges = layoutSceneMarkerBadges([{ id: 'A', x: 350, y: 300 }, { id: 'B', x: 391, y: 300.09375 }], 800, 600, 31);
+    const size = { width: 180, height: 34 };
+    const belowBlock = [{ x: 0, y: 325, width: 800, height: 75 }];
+    const above = layoutSceneMarkerCaption('A', badges, 800, 600, size, belowBlock)!;
+    expect(above.side).toBe('above');
+    const retained = layoutSceneMarkerCaption('B', badges, 800, 600, size, [], 12, 10, { previous: above })!;
+    expect(retained.side).toBe('above');
+    expect(retained.y).toBe(above.y);
+    const changed = layoutSceneMarkerCaption('B', badges, 800, 600, size, [{ x: 0, y: 245, width: 800, height: 50 }], 12, 10, { previous: retained })!;
+    expect(changed.side).toBe('below');
+  });
+
+  it('retains near-edge cluster membership through small camera movement and resets for another cluster', () => {
+    const badge = (id: string, x: number) => ({ id, x, y: 220, anchorX: x, anchorY: 220, size: 31 });
+    const initial = layoutSceneMarkerCaption('A', [badge('A', 300), badge('B', 354.5)], 800, 600, { width: 180, height: 34 })!;
+    expect(initial.clusterIds).toEqual(['A', 'B']);
+    const retained = layoutSceneMarkerCaption('B', [badge('A', 300), badge('B', 358)], 800, 600, { width: 180, height: 34 }, [], 12, 10, { previous: initial })!;
+    expect(retained.clusterKey).toBe(initial.clusterKey);
+    const other = layoutSceneMarkerCaption('candidate', [badge('A', 300), badge('B', 358), badge('candidate', 650)], 800, 600, { width: 180, height: 34 }, [], 12, 10, { previous: retained })!;
+    expect(other.clusterIds).toEqual(['candidate']);
+    expect(other.side).toBe('below');
+  });
 });

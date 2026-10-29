@@ -10,7 +10,7 @@ import type { ImageAsset, TerrainVisualEntry, TerrainVisualManifest, VisualAsset
 import { lunarArcDestination, lunarArcOffsets, lunarPointToScene, scenePointToLunar } from './sceneCoordinates';
 import type { LunarFrameOrigin, LunarGroundPoint, ScenePoint } from './sceneCoordinates';
 import { layoutSceneMarkerBadges, layoutSceneMarkerCaption, observerPose, scenarioObserverMarker, sceneCaptionOwner } from './sceneScenarioVisuals';
-import type { SceneMarkerAnchor, SceneMarkerBadge, SceneOverlayRect } from './sceneScenarioVisuals';
+import type { SceneCaptionPlacement, SceneMarkerAnchor, SceneMarkerBadge, SceneOverlayRect } from './sceneScenarioVisuals';
 import type { SceneObserverMarker } from './sceneScenarioVisuals';
 
 export type { SceneObserverMarker } from './sceneScenarioVisuals';
@@ -563,6 +563,8 @@ export default function Scene(props: SceneProps) {
       renderer.shadowMap.needsUpdate = true;
     }
 
+    let captionPlacement: SceneCaptionPlacement | null = null;
+    let captionMode = state.mode;
     function labelCaptionOwner(elements: Map<string, HTMLElement>, badges: readonly SceneMarkerBadge[], active: string | undefined, candidate: string | null = null) {
       const intent = captionIntent.current;
       if (intent.focused && elements.get(intent.focused) !== document.activeElement) intent.focused = null;
@@ -573,9 +575,15 @@ export default function Scene(props: SceneProps) {
     function placeLabelCaption(elements: Map<string, HTMLElement>, badges: readonly SceneMarkerBadge[], owner: string | null, text: string, width: number, height: number) {
       const caption = markerCaption.current;
       if (!caption) return;
-      if (!owner) { caption.hidden = true; caption.setAttribute('aria-hidden', 'true'); delete caption.dataset.owner; return; }
+      if (captionMode !== state.mode) { captionPlacement = null; captionMode = state.mode; }
+      const hide = () => {
+        caption.hidden = true; caption.setAttribute('aria-hidden', 'true'); delete caption.dataset.owner;
+        for (const element of elements.values()) element.removeAttribute('aria-describedby');
+      };
+      if (!owner) { hide(); return; }
       if (caption.textContent !== text) caption.textContent = text;
-      caption.hidden = false; caption.style.visibility = 'hidden'; caption.style.width = 'max-content';
+      caption.hidden = false; caption.style.width = 'max-content';
+      caption.style.minWidth = state.mode === 'terrain' ? `${Math.max(0, Math.min(180, width - 24))}px` : '0';
       caption.style.maxWidth = `${Math.max(1, Math.min(260, width - 24))}px`;
       const captionBounds = caption.getBoundingClientRect();
       const hostBounds = host!.getBoundingClientRect();
@@ -587,12 +595,17 @@ export default function Scene(props: SceneProps) {
         const x = Math.max(0, bounds.left - hostBounds.left), y = Math.max(0, bounds.top - hostBounds.top);
         hud.push({ x, y, width: Math.min(width, bounds.right - hostBounds.left) - x, height: Math.min(height, bounds.bottom - hostBounds.top) - y });
       }
-      const placement = layoutSceneMarkerCaption(owner, badges, width, height, { width: captionBounds.width || 180, height: captionBounds.height || 34 }, hud);
-      if (!placement) { caption.hidden = true; caption.setAttribute('aria-hidden', 'true'); delete caption.dataset.owner; return; }
+      const placement = layoutSceneMarkerCaption(owner, badges, width, height, { width: captionBounds.width || 180, height: captionBounds.height || 34 }, hud, 12, 10, { previous: captionPlacement });
+      if (!placement) { hide(); return; }
+      captionPlacement = placement;
       caption.style.left = `${placement.x}px`; caption.style.top = `${placement.y}px`;
-      caption.style.visibility = 'visible'; caption.setAttribute('aria-hidden', 'false'); caption.dataset.owner = owner;
+      caption.style.visibility = 'visible'; caption.setAttribute('aria-hidden', 'false'); caption.dataset.owner = owner; caption.dataset.side = placement.side;
       const ownerElement = elements.get(owner);
-      if (ownerElement instanceof HTMLButtonElement) ownerElement.setAttribute('aria-describedby', markerCaptionId);
+      for (const element of elements.values()) {
+        if (element === ownerElement && element instanceof HTMLButtonElement) {
+          if (element.getAttribute('aria-describedby') !== markerCaptionId) element.setAttribute('aria-describedby', markerCaptionId);
+        } else element.removeAttribute('aria-describedby');
+      }
     }
 
     function updateLabels() {
@@ -604,7 +617,7 @@ export default function Scene(props: SceneProps) {
       for (const site of ordered) {
         const element = labels.current[site.id];
         if (!element) continue;
-        globeElements.set(site.id, element); element.removeAttribute('aria-describedby');
+        globeElements.set(site.id, element);
         const point = location(site, (site.terrain.centerHeightM ?? 0) + 2_000);
         const normal = point.clone().normalize();
         const projected = point.clone().project(globeCamera);
@@ -632,11 +645,6 @@ export default function Scene(props: SceneProps) {
       const elements = new Map<string, HTMLElement>();
       for (const [id, element] of Object.entries(scenarioLabels.current)) if (element) elements.set(id, element);
       if (candidateLabel.current) elements.set('candidate', candidateLabel.current);
-      for (const element of elements.values()) {
-        element.style.opacity = '0'; element.style.pointerEvents = 'none';
-        element.setAttribute('aria-hidden', 'true'); element.removeAttribute('aria-describedby');
-        if (element instanceof HTMLButtonElement) element.tabIndex = -1;
-      }
       const anchors: SceneMarkerAnchor[] = [];
       const addAnchor = (id: string, point: THREE.Vector3) => {
         const screen = point.project(camera);
@@ -653,6 +661,12 @@ export default function Scene(props: SceneProps) {
       if (candidate) addAnchor('candidate', new THREE.Vector3(candidate.displayPoint.x, candidate.displayPoint.y + 2, candidate.displayPoint.z));
       const badgeSize = Math.max(31, ...[...elements.values()].map(element => Math.max(element.offsetWidth, element.offsetHeight)));
       const badges = layoutSceneMarkerBadges(anchors, width, height, badgeSize);
+      const visibleBadgeIds = new Set(badges.map(badge => badge.id));
+      for (const [id, element] of elements) if (!visibleBadgeIds.has(id)) {
+        element.style.opacity = '0'; element.style.pointerEvents = 'none';
+        element.setAttribute('aria-hidden', 'true'); element.removeAttribute('aria-describedby');
+        if (element instanceof HTMLButtonElement) element.tabIndex = -1;
+      }
       for (const badge of badges) {
         const element = elements.get(badge.id)!;
         element.style.opacity = '1'; element.style.pointerEvents = element instanceof HTMLButtonElement ? 'auto' : 'none';
@@ -904,14 +918,8 @@ export default function Scene(props: SceneProps) {
     document.addEventListener('visibilitychange', invalidate);
     const layoutSurface = host.closest('.viewer');
     const sceneLayoutChanged = () => {
-      // HUD-only changes need not touch the camera or props. Hide stale text
-      // synchronously, then measure its new free space on the next frame.
-      const caption = markerCaption.current;
-      if (caption) {
-        caption.hidden = true; caption.style.visibility = 'hidden';
-        caption.setAttribute('aria-hidden', 'true'); delete caption.dataset.owner;
-      }
-      for (const element of [...Object.values(labels.current), ...Object.values(scenarioLabels.current)]) element?.removeAttribute('aria-describedby');
+      // Reflow against the new HUD synchronously, without a hidden frame.
+      updateLabels();
       invalidate();
     };
     layoutSurface?.addEventListener('moonda:scene-layout', sceneLayoutChanged);

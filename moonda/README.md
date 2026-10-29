@@ -1,6 +1,6 @@
 # MOONDA Lunar Observatory
 
-An exploratory lunar south-pole comparison tool built with the NASA-AMMOS renderer, NASA elevation data and SPICE Sun/Earth geometry. Version 0.3.1 compares two mission scenarios at selectable nearby points, with independent panel and antenna heights and an assumption-based solar/battery estimate. The Moon overview and regional terrain remain available, as does the original three-point reference explorer with its unchanged scientific dataset.
+An exploratory lunar south-pole comparison tool built with the NASA-AMMOS renderer, NASA elevation data and SPICE Sun/Earth geometry. Version 0.3.2 compares two mission scenarios at selectable nearby points, with independent panel and antenna heights and an assumption-based solar/battery estimate. The Moon overview and regional terrain remain available, as does the original three-point reference explorer with its unchanged scientific dataset.
 
 ## Run locally
 
@@ -119,3 +119,5 @@ These check coordinate transforms, horizon geometry, ephemeris metadata and stat
 Automated checks must be followed by visual browser verification: inspect progressive imagery and all regions, lock nearby points, vary the two receiver heights independently, compare A with a +72-hour B, change energy assumptions, restore collapsed panels, revisit the original reference explorer, and reload in production after the complete cache reports ready. Measure sharpness, responsiveness, and compatibility on the demonstration hardware. These checks establish implementation consistency, not flight readiness or independent landing suitability.
 
 The 0.3.1 UI follow-up separates coincident point labels and reserves space for scene controls, tours and presentation readings. See [UI overlay validation](./docs/ui-overlay-validation.md) for the browser checks.
+
+The 0.3.2 interaction follow-up keeps hover captions, loading regions and linked chart times stable. See the [five-minute walkthrough](./docs/demo-walkthrough.md) and [interaction validation](./docs/ui-stability-validation.md).

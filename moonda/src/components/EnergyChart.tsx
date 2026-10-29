@@ -105,12 +105,10 @@ export default function EnergyChart({ points, generationIntervals, capacityWh, r
     return () => observer.disconnect();
   }, []);
 
-  useEffect(() => {
-    const timestamp = currentTimeUtc ? Date.parse(currentTimeUtc) : NaN;
-    if (Number.isFinite(timestamp)) setSelectedTimestamp(timestamp);
-  }, [currentTimeUtc]);
-
-  const selectedIndex = nearestSample(samples, selectedTimestamp ?? (currentTimeUtc ? Date.parse(currentTimeUtc) : NaN));
+  // A linked scene owns the timestamp. Read it in this render so a time or A/B
+  // change never paints the previous scenario's cursor before an effect runs.
+  const controlledTimestamp = currentTimeUtc ? Date.parse(currentTimeUtc) : NaN;
+  const selectedIndex = nearestSample(samples, Number.isFinite(controlledTimestamp) ? controlledTimestamp : selectedTimestamp ?? NaN);
   const selected = samples[selectedIndex];
   const chooseSample = (index: number) => {
     const sample = samples[clamp(Math.round(index), 0, samples.length - 1)];
@@ -182,7 +180,7 @@ export default function EnergyChart({ points, generationIntervals, capacityWh, r
       <span className="energy-chart-time"><strong>{utc.format(selected.timestamp)}</strong><small>UTC · +{elapsedLabel((selected.timestamp - firstTime) / 3_600_000)}</small></span>
       <span className="energy-chart-metric energy-chart-generation-readout" title={selectedPower === null ? 'No computed power interval contains this timestamp' : suppliedPowerIntervals === null ? 'Midpoint power estimate for the preceding sampled interval' : 'Midpoint power estimate for the model interval containing this timestamp'}><small>Interval power</small><strong>{selectedPower === null ? '—' : number.format(selectedPower)} <span>W</span></strong></span>
       <span className={`energy-chart-metric energy-chart-battery-readout ${validReserve && selected.batteryWh < reserveWh ? 'is-below-reserve' : ''}`}><small>Battery</small><strong>{number.format(selected.batteryWh)} <span>Wh</span></strong></span>
-      {selected.unmetLoadWh > 0 && <span className="energy-chart-metric energy-chart-unmet-readout"><small>Unmet load, cumulative</small><strong>{number.format(selected.unmetLoadWh)} <span>Wh</span></strong></span>}
+      <span className="energy-chart-metric energy-chart-unmet-readout"><small>Unmet load, cumulative</small><strong>{number.format(selected.unmetLoadWh)} <span>Wh</span></strong></span>
     </div>
     <svg className="energy-chart-svg" width="100%" height="244" viewBox={`0 0 ${width} 244`} role="img" aria-labelledby={titleId} aria-describedby={descriptionId} onPointerDown={event => {
       scrubbing.current = true;

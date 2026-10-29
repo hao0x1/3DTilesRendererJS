@@ -55,30 +55,75 @@ export function layoutSceneMarkerBadges(anchors: readonly SceneMarkerAnchor[], w
   return best ?? initial;
 }
 
-/** Place the single caption around its owner while avoiding badges and HUD. */
-export function layoutSceneMarkerCaption(ownerId: string, badges: readonly SceneMarkerBadge[], width: number, height: number, captionSize: { width: number; height: number }, hud: readonly SceneOverlayRect[] = [], padding = 12, gap = 10): SceneOverlayRect | null {
+export type SceneCaptionSide = 'below' | 'above' | 'right' | 'left';
+export interface SceneCaptionPlacement extends SceneOverlayRect {
+  side: SceneCaptionSide;
+  clusterKey: string;
+  clusterIds: string[];
+  cluster: SceneOverlayRect;
+}
+export interface SceneCaptionLayoutOptions {
+  previous?: SceneCaptionPlacement | null;
+  clusterGap?: number;
+}
+
+/** One stable caption slot belongs to a connected badge cluster, not its owner. */
+export function layoutSceneMarkerCaption(ownerId: string, badges: readonly SceneMarkerBadge[], width: number, height: number, captionSize: { width: number; height: number }, hud: readonly SceneOverlayRect[] = [], padding = 12, gap = 10, options: SceneCaptionLayoutOptions = {}): SceneCaptionPlacement | null {
   const owner = badges.find(badge => badge.id === ownerId);
   if (!owner) return null;
   const w = Math.min(captionSize.width, width - padding * 2), h = Math.min(captionSize.height, height - padding * 2);
   if (w <= 0 || h <= 0) return null;
-  const positions: { x: number; y: number }[] = [];
-  const around = (rect: SceneOverlayRect) => positions.push(
-    { x: rect.x + rect.width + gap, y: owner.y - h / 2 },
-    { x: rect.x - w - gap, y: owner.y - h / 2 },
-    { x: owner.x - w / 2, y: rect.y - h - gap },
-    { x: owner.x - w / 2, y: rect.y + rect.height + gap },
-  );
-  around(badgeRect(owner));
-  for (const rect of [...badges.map(badgeRect), ...hud]) around(rect);
-  for (const x of [padding, (width - w) / 2, width - w - padding]) for (const y of [padding, (height - h) / 2, height - h - padding]) positions.push({ x, y });
-  let best: SceneOverlayRect | null = null, bestCost = Infinity;
-  for (const point of positions) {
-    const rect = { x: Math.max(padding, Math.min(width - w - padding, point.x)), y: Math.max(padding, Math.min(height - h - padding, point.y)), width: w, height: h };
-    if (badges.some(badge => overlaps(rect, badgeRect(badge), gap)) || hud.some(blocked => overlaps(rect, blocked, 6))) continue;
-    const cost = (rect.x + w / 2 - owner.x) ** 2 + (rect.y + h / 2 - owner.y) ** 2;
-    if (cost < bestCost) { bestCost = cost; best = rect; }
+  const previous = options.previous, clusterGap = Math.max(0, options.clusterGap ?? 24);
+  const connected = (a: SceneMarkerBadge, b: SceneMarkerBadge) => {
+    const ra = badgeRect(a), rb = badgeRect(b);
+    const dx = Math.max(0, ra.x - rb.x - rb.width, rb.x - ra.x - ra.width);
+    const dy = Math.max(0, ra.y - rb.y - rb.height, rb.y - ra.y - ra.height);
+    // Keep an existing cluster together through small camera/subpixel changes.
+    const retained = previous?.clusterIds.includes(a.id) && previous.clusterIds.includes(b.id);
+    return Math.hypot(dx, dy) <= clusterGap + (retained ? 8 : 0) + 0.001;
+  };
+  const members = [owner], memberIds = new Set([owner.id]);
+  for (let index = 0; index < members.length; index++) {
+    for (const badge of badges) if (!memberIds.has(badge.id) && connected(members[index], badge)) { members.push(badge); memberIds.add(badge.id); }
   }
-  return best;
+  const rects = members.map(badgeRect);
+  const left = Math.min(...rects.map(rect => rect.x)), top = Math.min(...rects.map(rect => rect.y));
+  const cluster = { x: left, y: top, width: Math.max(...rects.map(rect => rect.x + rect.width)) - left, height: Math.max(...rects.map(rect => rect.y + rect.height)) - top };
+  const clusterIds = [...memberIds].sort(), clusterKey = JSON.stringify(clusterIds);
+  const sameCluster = previous?.clusterKey === clusterKey;
+  const priority: SceneCaptionSide[] = ['below', 'above', 'right', 'left'];
+  const sides = sameCluster ? [previous.side, ...priority.filter(side => side !== previous.side)] : priority;
+  const blocked = [...badges.map(badge => ({ rect: badgeRect(badge), clearance: gap })), ...hud.map(rect => ({ rect, clearance: 6 }))];
+  const fits = (rect: SceneOverlayRect) => rect.x >= padding - 0.001 && rect.y >= padding - 0.001 && rect.x + w <= width - padding + 0.001 && rect.y + h <= height - padding + 0.001 && !blocked.some(item => overlaps(rect, item.rect, item.clearance));
+  for (const side of sides) {
+    const horizontal = side === 'below' || side === 'above';
+    const centre = horizontal ? cluster.x + cluster.width / 2 : cluster.y + cluster.height / 2;
+    const crossSize = horizontal ? w : h, extent = horizontal ? width : height;
+    const makeRect = (crossCentre: number): SceneOverlayRect => {
+      const cross = Math.max(padding, Math.min(extent - crossSize - padding, crossCentre - crossSize / 2));
+      if (side === 'below') return { x: cross, y: cluster.y + cluster.height + gap, width: w, height: h };
+      if (side === 'above') return { x: cross, y: cluster.y - gap - h, width: w, height: h };
+      if (side === 'right') return { x: cluster.x + cluster.width + gap, y: cross, width: w, height: h };
+      return { x: cluster.x - gap - w, y: cross, width: w, height: h };
+    };
+    const candidates: number[] = [];
+    if (sameCluster && previous.side === side) {
+      const oldCentre = horizontal ? previous.cluster.x + previous.cluster.width / 2 : previous.cluster.y + previous.cluster.height / 2;
+      const oldCaptionCentre = horizontal ? previous.x + previous.width / 2 : previous.y + previous.height / 2;
+      candidates.push(centre + oldCaptionCentre - oldCentre);
+    }
+    candidates.push(centre);
+    const alternatives = blocked.flatMap(({ rect, clearance }) => horizontal
+      ? [rect.x - clearance - w / 2, rect.x + rect.width + clearance + w / 2]
+      : [rect.y - clearance - h / 2, rect.y + rect.height + clearance + h / 2]);
+    alternatives.sort((a, b) => Math.abs(a - centre) - Math.abs(b - centre) || a - b);
+    candidates.push(...alternatives);
+    for (const crossCentre of candidates) {
+      const rect = makeRect(crossCentre);
+      if (fits(rect)) return { ...rect, side, clusterKey, clusterIds, cluster };
+    }
+  }
+  return null;
 }
 
 export function observerPose(origin: LunarFrameOrigin, observer: LunarGroundPoint) {

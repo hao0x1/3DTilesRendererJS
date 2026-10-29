@@ -1,6 +1,6 @@
 # MOONDA Lunar Observatory
 
-This fork adds a local-first lunar site comparison prototype in [`moonda/`](./moonda/README.md), built with the upstream NASA-AMMOS renderer and NASA imagery and terrain data. MOONDA 0.3.1 compares A/B arrival scenarios at nearby points using native 5 m/80 m terrain, independent panel and antenna heights, SPICE Sun/Earth geometry from January 2026 through January 1, 2028 UTC, and an assumption-based finite-disc solar/battery model. Its v2 display retains progressive 2K/8K/16K lunar imagery, measured global relief, and free exploration of 81.92 km regional terrain with 10 m finest geometry sampling. The renderer source and its Apache-2.0 license are preserved.
+This fork adds a local-first lunar site comparison prototype in [`moonda/`](./moonda/README.md), built with the upstream NASA-AMMOS renderer and NASA imagery and terrain data. MOONDA 0.3.2 compares A/B arrival scenarios at nearby points using native 5 m/80 m terrain, independent panel and antenna heights, SPICE Sun/Earth geometry from January 2026 through January 1, 2028 UTC, and an assumption-based finite-disc solar/battery model. Its v2 display retains progressive 2K/8K/16K lunar imagery, measured global relief, and free exploration of 81.92 km regional terrain with 10 m finest geometry sampling. The renderer source and its Apache-2.0 license are preserved.
 
 ```sh
 cd moonda
