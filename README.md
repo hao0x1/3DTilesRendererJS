@@ -1,6 +1,6 @@
 # MOONDA Lunar Observatory
 
-This fork adds a local-first lunar site comparison prototype in [`moonda/`](./moonda/README.md), built with the upstream NASA-AMMOS renderer and NASA imagery and terrain data. The renderer source and its Apache-2.0 license are preserved.
+This fork adds a local-first lunar site comparison prototype in [`moonda/`](./moonda/README.md), built with the upstream NASA-AMMOS renderer and NASA imagery and terrain data. Its v2 display adds progressive 2K/8K/16K lunar imagery, measured global relief, and free exploration of 81.92 km regional terrain with 10 m finest geometry sampling. The renderer source and its Apache-2.0 license are preserved.
 
 ```sh
 cd moonda
@@ -8,7 +8,7 @@ npm ci
 npm run dev
 ```
 
-MOONDA has its own small build and local data; it does not require the Cesium ion credentials used by the original lunar example. See the application README for scientific methods, data sources, and limitations.
+MOONDA has a separate app build and bundled local assets; it does not require Cesium ion credentials. The original approximately 865 KB science bundle still calculates visibility at three fixed 2 m observers from the November 2026 cache. Camera movement and display lighting do not change those calculations. The full production offline package is approximately 410 MB, and its badge reports ready only after the complete matching build is cached. See the application README for controls, asset provenance, offline preparation, checks, and scientific limitations.
 
 # 3d-tiles-renderer
 

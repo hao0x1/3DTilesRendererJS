@@ -333,7 +333,11 @@ export function formatDuration(hours: number): string {
   return [days ? `${days} d` : '', remainingHours ? `${remainingHours} h` : '', remainingMinutes ? `${remainingMinutes} min` : ''].filter(Boolean).join(' ');
 }
 
-function indexForTime(times: number[], timeMs: number): number {
+/** Fractional sample index for a UTC instant, bounded by the available cache. */
+export function indexForTime(times: number[], timeMs: number): number {
+  if (!times.length || !Number.isFinite(timeMs)) throw new RangeError('A finite UTC instant and nonempty time axis are required.');
+  if (timeMs <= times[0]) return 0;
+  if (timeMs >= times[times.length - 1]) return times.length - 1;
   let low = 0;
   let high = times.length - 1;
   while (low < high) {

@@ -1,9 +1,24 @@
 import { describe, expect, it } from 'vitest';
-import { analyzeSite, findMissionWindow, formatDuration, horizonAt, sampleAt, sampleAtTime, visibilitySegments } from './science';
+import { analyzeSite, findMissionWindow, formatDuration, horizonAt, indexForTime, sampleAt, sampleAtTime, visibilitySegments } from './science';
 import type { Mission, Site } from './types';
 
 const start = Date.parse('2026-11-01T00:00:00Z');
 const hour = 3_600_000;
+
+describe('UTC time selection', () => {
+  it('preserves entered minutes across hourly and irregular sample axes', () => {
+    expect(indexForTime([start, start + hour, start + 2 * hour], start + 1.25 * hour)).toBe(1.25);
+    expect(indexForTime([start, start + 2 * hour, start + 5 * hour], start + 3 * hour)).toBeCloseTo(4 / 3);
+  });
+
+  it('bounds out-of-cache instants and rejects invalid instants', () => {
+    const times = [start, start + hour];
+    expect(indexForTime(times, start - hour)).toBe(0);
+    expect(indexForTime(times, start + 2 * hour)).toBe(1);
+    expect(() => indexForTime([], start)).toThrow(RangeError);
+    expect(() => indexForTime(times, NaN)).toThrow(RangeError);
+  });
+});
 
 function siteWith(options: {
   hours?: number[];
